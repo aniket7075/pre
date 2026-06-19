@@ -1,7 +1,7 @@
 import axios from 'axios';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
-const API_URL = 'http://localhost:5000/api'; // Change for production or physical device
+const API_URL = 'https://pre-n3cv.onrender.com/api'; // Change for production or physical device
 
 const apiClient = axios.create({
   baseURL: API_URL,

@@ -26,8 +26,12 @@ const AdminDashboard: React.FC<Props> = ({ navigation }) => {
     { title: 'Assign Fees', icon: 'cash', screen: 'AssignFee', color: '#10B981', bg: 'bg-emerald-50' },
     { title: 'Publish Notice', icon: 'megaphone', screen: 'CreateNotice', color: '#F59E0B', bg: 'bg-amber-50' },
     { title: 'Transport', icon: 'bus', screen: 'Transport', color: '#F43F5E', bg: 'bg-rose-50' },
-    { title: 'Global Chat', icon: 'chatbubbles', screen: 'Chat', color: '#3B82F6', bg: 'bg-blue-50' },
-    { title: 'Progress', icon: 'trending-up', screen: 'Progress', color: '#A855F7', bg: 'bg-purple-50' },
+    { title: 'Global Chat', icon: 'chatbubbles', screen: 'ChatList', color: '#3B82F6', bg: 'bg-blue-50' },
+    { title: 'Leaves', icon: 'document-text', screen: 'Leaves', color: '#8B5CF6', bg: 'bg-purple-50' },
+    { title: 'Timetable', icon: 'calendar-outline', screen: 'Timetable', color: '#EC4899', bg: 'bg-pink-50' },
+    { title: 'Gallery', icon: 'images', screen: 'Gallery', color: '#F59E0B', bg: 'bg-amber-50' },
+    { title: 'Library', icon: 'library', screen: 'Library', color: '#10B981', bg: 'bg-emerald-50' },
+    { title: 'Certificates', icon: 'ribbon', screen: 'Certificates', color: '#6366F1', bg: 'bg-indigo-50' },
   ];
 
   return (

@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { View, Text, FlatList, TextInput, TouchableOpacity, KeyboardAvoidingView, Platform } from 'react-native';
+import { View, Text, FlatList, TextInput, TouchableOpacity, KeyboardAvoidingView, Platform, ActivityIndicator } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import Icon from 'react-native-vector-icons/Ionicons';
 import apiClient from '../api/client';
@@ -13,31 +13,54 @@ const ChatScreen: React.FC<Props> = ({ route, navigation }) => {
   const { user } = useSelector((state: RootState) => state.auth);
   const [messages, setMessages] = useState<any[]>([]);
   const [inputText, setInputText] = useState('');
-  const roomId = route.params?.roomId || 'dummy_room_id';
+  const [loading, setLoading] = useState(true);
+  const roomId = route.params?.roomId;
+  const chatName = route.params?.chatName || 'Chat';
 
-  useEffect(() => {
-    const fetchMessages = async () => {
-      setMessages([
-        { id: '1', sender_id: user?.id, message: 'Hello! How is the child doing?' },
-        { id: '2', sender_id: 'other_id', message: 'Doing great today! Played a lot and finished lunch.' }
-      ]);
-    };
-    fetchMessages();
-  }, []);
-
-  const sendMessage = async () => {
-    if (!inputText.trim()) return;
+  const fetchMessages = async () => {
+    if (!roomId) return;
     try {
-      const newMessage = { id: Date.now().toString(), sender_id: user?.id, message: inputText };
-      setMessages(prev => [...prev, newMessage]);
-      setInputText('');
-
-      await apiClient.post('/chat/messages', {
-        room_id: roomId,
-        message: inputText
-      });
+      const response = await apiClient.get(`/chat/messages/${roomId}`);
+      setMessages(response.data.data);
     } catch (error) {
       console.error(error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchMessages();
+    // Simple polling for new messages (prototype)
+    const interval = setInterval(() => fetchMessages(), 3000);
+    return () => clearInterval(interval);
+  }, [roomId]);
+
+  const sendMessage = async () => {
+    if (!inputText.trim() || !roomId) return;
+    
+    // Optimistic UI update
+    const optimisticMessage = { 
+      id: Date.now().toString(), 
+      sender_id: user?.id, 
+      message: inputText,
+      created_at: new Date().toISOString()
+    };
+    
+    setMessages(prev => [...prev, optimisticMessage]);
+    const textToSend = inputText;
+    setInputText('');
+
+    try {
+      await apiClient.post('/chat/messages', {
+        room_id: roomId,
+        message: textToSend
+      });
+      // fetchMessages will sync it soon via polling
+    } catch (error) {
+      console.error('Send message failed:', error);
+      // Remove optimistic update on failure
+      setMessages(prev => prev.filter(m => m.id !== optimisticMessage.id));
     }
   };
 
@@ -59,9 +82,9 @@ const ChatScreen: React.FC<Props> = ({ route, navigation }) => {
           </TouchableOpacity>
           <View className="flex-row items-center">
             <View className="w-10 h-10 bg-white/20 rounded-full items-center justify-center mr-3">
-              <Icon name="person" size={20} color="#fff" />
+              <Text className="text-white font-bold">{chatName[0]}</Text>
             </View>
-            <Text className="text-xl font-bold text-white">Class Teacher</Text>
+            <Text className="text-xl font-bold text-white">{chatName}</Text>
           </View>
         </View>
       </View>
@@ -70,13 +93,20 @@ const ChatScreen: React.FC<Props> = ({ route, navigation }) => {
         className="flex-1" 
         behavior={Platform.OS === 'ios' ? 'padding' : undefined}
       >
-        <FlatList
-          data={messages}
-          keyExtractor={item => item.id}
-          renderItem={renderMessage}
-          contentContainerStyle={{ padding: 20, paddingBottom: 40 }}
-          showsVerticalScrollIndicator={false}
-        />
+        {loading ? (
+          <View className="flex-1 justify-center items-center">
+            <ActivityIndicator size="large" color="#4F46E5" />
+          </View>
+        ) : (
+          <FlatList
+            data={messages}
+            keyExtractor={item => item.id}
+            renderItem={renderMessage}
+            contentContainerStyle={{ padding: 20, paddingBottom: 40 }}
+            showsVerticalScrollIndicator={false}
+            inverted={false} // Adjust based on sorting
+          />
+        )}
         
         <View className="flex-row p-4 bg-card border-t border-border items-center">
           <TextInput 

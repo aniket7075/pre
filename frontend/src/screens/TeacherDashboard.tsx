@@ -24,11 +24,13 @@ const TeacherDashboard: React.FC<Props> = ({ navigation }) => {
     { title: 'My Classes', icon: 'business', screen: 'Classes', color: '#6366F1', bg: 'bg-indigo-50' },
     { title: 'Mark Attendance', icon: 'checkmark-circle', screen: 'MarkAttendance', color: '#14B8A6', bg: 'bg-teal-50' },
     { title: 'Assign Homework', icon: 'create', screen: 'CreateHomework', color: '#10B981', bg: 'bg-emerald-50' },
-    { title: 'Upload Notes', icon: 'document-text', screen: 'Notes', color: '#F59E0B', bg: 'bg-amber-50' },
-    { title: 'Parent Chats', icon: 'chatbubbles', screen: 'Chat', color: '#3B82F6', bg: 'bg-blue-50' },
+    { title: 'Lesson Plan', icon: 'book', screen: 'LessonPlan', color: '#10B981', bg: 'bg-emerald-50' },
+    { title: 'Enter Marks', icon: 'create', screen: 'EnterMarks', color: '#F59E0B', bg: 'bg-amber-50' },
+    { title: 'Parent Chats', icon: 'chatbubbles', screen: 'ChatList', color: '#3B82F6', bg: 'bg-blue-50' },
     { title: 'Notices', icon: 'megaphone', screen: 'Notice', color: '#F43F5E', bg: 'bg-rose-50' },
-    { title: 'Progress', icon: 'trending-up', screen: 'Progress', color: '#A855F7', bg: 'bg-purple-50' },
-    { title: 'Results', icon: 'trophy', screen: 'Results', color: '#F97316', bg: 'bg-orange-50' },
+    { title: 'Leaves', icon: 'document-text', screen: 'Leaves', color: '#8B5CF6', bg: 'bg-purple-50' },
+    { title: 'Timetable', icon: 'calendar-outline', screen: 'Timetable', color: '#EC4899', bg: 'bg-pink-50' },
+    { title: 'Gallery', icon: 'images', screen: 'Gallery', color: '#F59E0B', bg: 'bg-amber-50' },
   ];
 
   return (

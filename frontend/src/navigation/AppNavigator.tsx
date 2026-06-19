@@ -14,8 +14,15 @@ import NoticeScreen from '../screens/NoticeScreen';
 import FeeScreen from '../screens/FeeScreen';
 import TransportScreen from '../screens/TransportScreen';
 import AdminDashboard from '../screens/AdminDashboard';
-import TeacherDashboard from '../screens/TeacherDashboard';
 import ChatScreen from '../screens/ChatScreen';
+import ChatListScreen from '../screens/ChatListScreen';
+import LeaveScreen from '../screens/LeaveScreen';
+import TimetableScreen from '../screens/TimetableScreen';
+import GalleryScreen from '../screens/GalleryScreen';
+import LessonPlanScreen from '../screens/LessonPlanScreen';
+import MarkEntryScreen from '../screens/MarkEntryScreen';
+import LibraryScreen from '../screens/LibraryScreen';
+import CertificateScreen from '../screens/CertificateScreen';
 import ResultScreen from '../screens/ResultScreen';
 import ProgressDashboard from '../screens/ProgressDashboard';
 import StaffScreen from '../screens/StaffScreen';
@@ -59,8 +66,8 @@ const AppNavigator = () => {
             <Stack.Screen name="Homework" component={HomeworkScreen} />
             <Stack.Screen name="Notice" component={NoticeScreen} />
             <Stack.Screen name="Fees" component={FeeScreen} />
-            <Stack.Screen name="Transport" component={TransportScreen} />
             <Stack.Screen name="Chat" component={ChatScreen} />
+            <Stack.Screen name="ChatList" component={ChatListScreen} />
             <Stack.Screen name="Results" component={ResultScreen} />
             <Stack.Screen name="Progress" component={ProgressDashboard} />
             <Stack.Screen name="Staff" component={StaffScreen} />
@@ -72,6 +79,13 @@ const AppNavigator = () => {
             <Stack.Screen name="AssignFee" component={AssignFeeScreen} />
             <Stack.Screen name="CreateHomework" component={CreateHomeworkScreen} />
             <Stack.Screen name="CreateNotice" component={CreateNoticeScreen} />
+            <Stack.Screen name="Leaves" component={LeaveScreen} />
+            <Stack.Screen name="Timetable" component={TimetableScreen} />
+            <Stack.Screen name="Gallery" component={GalleryScreen} />
+            <Stack.Screen name="LessonPlan" component={LessonPlanScreen} />
+            <Stack.Screen name="EnterMarks" component={MarkEntryScreen} />
+            <Stack.Screen name="Library" component={LibraryScreen} />
+            <Stack.Screen name="Certificates" component={CertificateScreen} />
           </>
         ) : (
           // Auth Stack

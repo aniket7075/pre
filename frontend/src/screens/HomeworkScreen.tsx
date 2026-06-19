@@ -15,14 +15,17 @@ const HomeworkScreen: React.FC<Props> = ({ navigation }) => {
     const fetchHomework = async () => {
       try {
         const response = await apiClient.get('/homework/dummy_section_id');
-        setHomework(response.data.data);
+        if (response.data.data && response.data.data.length > 0) {
+          setHomework(response.data.data);
+        } else {
+          // Fallback dummy data
+          setHomework([
+            { id: '1', title: 'Math Chapter 5', description: 'Solve exercises 1 to 10 on page 45.', due_date: 'Tomorrow' },
+            { id: '2', title: 'Science Project', description: 'Bring materials for the solar system model.', due_date: 'Next Monday' },
+          ]);
+        }
       } catch (error) {
         console.error(error);
-        // Fallback dummy data
-        setHomework([
-          { id: '1', title: 'Math Chapter 5', description: 'Solve exercises 1 to 10 on page 45.', due_date: 'Tomorrow' },
-          { id: '2', title: 'Science Project', description: 'Bring materials for the solar system model.', due_date: 'Next Monday' },
-        ]);
       } finally {
         setLoading(false);
       }

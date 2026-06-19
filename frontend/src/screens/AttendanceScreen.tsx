@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { View, Text, FlatList, ActivityIndicator, TouchableOpacity } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import Icon from 'react-native-vector-icons/Ionicons';
 import apiClient from '../api/client';
 import { useSelector } from 'react-redux';
@@ -10,6 +10,7 @@ import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 type Props = { navigation: NativeStackNavigationProp<any, any>; };
 
 const AttendanceScreen: React.FC<Props> = ({ navigation }) => {
+  const insets = useSafeAreaInsets();
   const { user } = useSelector((state: RootState) => state.auth);
   const [loading, setLoading] = useState(true);
   const [attendance, setAttendance] = useState<any[]>([]);
@@ -17,6 +18,8 @@ const AttendanceScreen: React.FC<Props> = ({ navigation }) => {
   useEffect(() => {
     const fetchAttendance = async () => {
       try {
+        // In a real app, this would be the selected child's ID.
+        // For now, we will fetch data if we know the student ID, otherwise show dummy data.
         const response = await apiClient.get('/attendance/dummy_id_here');
         setAttendance(response.data.data);
       } catch (error) {
@@ -26,6 +29,7 @@ const AttendanceScreen: React.FC<Props> = ({ navigation }) => {
           { id: '1', date: '2023-10-01', status: 'Present' },
           { id: '2', date: '2023-10-02', status: 'Absent' },
           { id: '3', date: '2023-10-03', status: 'Present' },
+          { id: '4', date: '2023-10-04', status: 'Leave' },
         ]);
       } finally {
         setLoading(false);
@@ -34,42 +38,58 @@ const AttendanceScreen: React.FC<Props> = ({ navigation }) => {
     fetchAttendance();
   }, []);
 
+  const getStatusColor = (status: string) => {
+    if (status === 'Present') return 'text-emerald-500 bg-emerald-50 border-emerald-200';
+    if (status === 'Absent') return 'text-rose-500 bg-rose-50 border-rose-200';
+    return 'text-amber-500 bg-amber-50 border-amber-200';
+  };
+
+  const getStatusIcon = (status: string) => {
+    if (status === 'Present') return 'checkmark-circle';
+    if (status === 'Absent') return 'close-circle';
+    return 'airplane';
+  };
+
   return (
-    <SafeAreaView className="flex-1 bg-background">
-      <View className="flex-row items-center p-5 bg-primary justify-between">
-        <View className="flex-row items-center">
-          <TouchableOpacity onPress={() => navigation.goBack()} className="mr-4">
-            <Icon name="arrow-back" size={24} color="#fff" />
-          </TouchableOpacity>
-          <Text className="text-xl font-bold text-white">Attendance Records</Text>
+    <View className="flex-1 bg-white" style={{ paddingTop: Math.max(insets.top, 10) }}>
+      <View className="flex-row items-center px-6 py-4 mb-2">
+        <TouchableOpacity onPress={() => navigation.goBack()} className="bg-gray-50 p-3 rounded-full mr-4">
+          <Icon name="arrow-back" size={24} color="#0F172A" />
+        </TouchableOpacity>
+        <View>
+          <Text className="text-textSecondary text-xs font-semibold tracking-widest uppercase">My Child</Text>
+          <Text className="text-textPrimary text-2xl font-black">Attendance</Text>
         </View>
-        <Icon name="calendar" size={24} color="#fff" />
       </View>
       
-      <View className="flex-1 p-5">
+      <View className="flex-1 px-5">
         {loading ? (
-          <ActivityIndicator size="large" color="#4F46E5" />
+          <ActivityIndicator size="large" color="#4F46E5" className="mt-10" />
         ) : (
           <FlatList
             data={attendance}
             keyExtractor={(item: any) => item.id}
             showsVerticalScrollIndicator={false}
-            renderItem={({ item }) => (
-              <View className="bg-card p-4 rounded-xl mb-4 flex-row justify-between items-center shadow-sm border border-border">
-                <View className="flex-row items-center">
-                  <View className={`p-3 rounded-full mr-4 ${item.status === 'Present' ? 'bg-emerald-100' : 'bg-rose-100'}`}>
-                    <Icon name={item.status === 'Present' ? 'checkmark-circle' : 'close-circle'} size={24} color={item.status === 'Present' ? '#10B981' : '#EF4444'} />
-                  </View>
-                  <View>
-                    <Text className="text-lg font-bold text-textPrimary">{item.date}</Text>
-                    <Text className="text-sm text-textSecondary">Status: {item.status}</Text>
+            contentContainerStyle={{ paddingBottom: 40 }}
+            renderItem={({ item }) => {
+              const colors = getStatusColor(item.status);
+              return (
+                <View 
+                  className={`p-4 rounded-2xl mb-3 flex-row justify-between items-center border ${colors}`}
+                  style={{ shadowColor: '#000', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.05, shadowRadius: 5, elevation: 2 }}
+                >
+                  <View className="flex-row items-center">
+                    <View className="bg-white/50 p-3 rounded-full mr-4">
+                      <Icon name={getStatusIcon(item.status)} size={24} color="inherit" />
+                    </View>
+                    <View>
+                      <Text className="text-lg font-bold text-textPrimary">{item.date}</Text>
+                      <Text className="text-sm font-medium opacity-80">{item.status}</Text>
+                    </View>
                   </View>
                 </View>
-                <Text className={`font-bold ${item.status === 'Present' ? 'text-emerald-500' : 'text-rose-500'}`}>
-                  {item.status}
-                </Text>
-              </View>
-            )}
+              );
+            }}
             ListEmptyComponent={
               <View className="items-center justify-center py-20">
                 <Icon name="calendar-outline" size={60} color="#E2E8F0" />
@@ -79,7 +99,7 @@ const AttendanceScreen: React.FC<Props> = ({ navigation }) => {
           />
         )}
       </View>
-    </SafeAreaView>
+    </View>
   );
 };
 

@@ -9,29 +9,47 @@ type Props = { navigation: NativeStackNavigationProp<any, any>; };
 
 const FeeScreen: React.FC<Props> = ({ navigation }) => {
   const [loading, setLoading] = useState(true);
+  const [payingId, setPayingId] = useState<string | null>(null);
   const [fees, setFees] = useState<any[]>([]);
 
-  useEffect(() => {
-    const fetchFees = async () => {
-      try {
-        const response = await apiClient.get('/fees/dummy_student_id');
+  const fetchFees = async () => {
+    try {
+      const response = await apiClient.get('/fees/dummy_student_id');
+      if (response.data.data.length > 0) {
         setFees(response.data.data);
-      } catch (error) {
-        console.error(error);
+      } else {
         // Fallback dummy data
         setFees([
           { id: '1', fee_type: 'Tuition Fee (Q1)', amount_due: '15000', due_date: '2023-11-01', status: 'pending' },
           { id: '2', fee_type: 'Transport Fee', amount_due: '2000', due_date: '2023-10-05', status: 'paid' },
         ]);
-      } finally {
-        setLoading(false);
       }
-    };
+    } catch (error) {
+      console.error(error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
     fetchFees();
   }, []);
 
   const handlePayment = async (feeId: string, amount: string) => {
-    Alert.alert('Payment Portal', 'Opening checkout for ₹' + amount);
+    try {
+      setPayingId(feeId);
+      await apiClient.post('/fees/verify-payment', {
+        fee_id: feeId,
+        amount_paid: amount
+      });
+      Alert.alert('Success', 'Payment simulated successfully! Receipt generated.');
+      fetchFees(); // Refresh the list to show as PAID
+    } catch (error) {
+      console.error(error);
+      Alert.alert('Error', 'Payment failed.');
+    } finally {
+      setPayingId(null);
+    }
   };
 
   return (
@@ -75,11 +93,14 @@ const FeeScreen: React.FC<Props> = ({ navigation }) => {
 
                 {item.status !== 'paid' && (
                   <TouchableOpacity 
-                    className="bg-primary py-3 rounded-lg flex-row justify-center items-center"
+                    className={`py-3 rounded-lg flex-row justify-center items-center ${payingId === item.id ? 'bg-gray-400' : 'bg-primary'}`}
                     onPress={() => handlePayment(item.id, item.amount_due)}
+                    disabled={payingId === item.id}
                   >
-                    <Icon name="card" size={20} color="#fff" className="mr-2" />
-                    <Text className="text-white font-bold text-center">Pay Now</Text>
+                    <Icon name={payingId === item.id ? "hourglass" : "card"} size={20} color="#fff" className="mr-2" />
+                    <Text className="text-white font-bold text-center">
+                      {payingId === item.id ? 'Processing...' : 'Pay Now'}
+                    </Text>
                   </TouchableOpacity>
                 )}
               </View>

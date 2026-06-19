@@ -2,30 +2,51 @@ import { Response } from 'express';
 import { pool } from '../config/database';
 import { AuthRequest } from '../middlewares/auth.middleware';
 
-export const markAttendance = async (req: AuthRequest, res: Response): Promise<void> => {
+export const getClassStudents = async (req: AuthRequest, res: Response): Promise<void> => {
   try {
-    const { student_id, section_id, date, status, remarks } = req.body;
+    const { grade } = req.params;
+    const result = await pool.query(
+      `SELECT id, full_name, grade FROM students WHERE grade = $1 ORDER BY full_name ASC`,
+      [grade]
+    );
+    res.status(200).json({ data: result.rows });
+  } catch (error) {
+    console.error('Get class students error:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+};
+
+export const bulkMarkAttendance = async (req: AuthRequest, res: Response): Promise<void> => {
+  const client = await pool.connect();
+  try {
+    const { date, records } = req.body; // records: [{student_id, status}]
     const teacherId = req.user?.id;
 
-    if (!student_id || !section_id || !date || !status) {
-      res.status(400).json({ error: 'Missing required fields' });
+    if (!date || !records || !Array.isArray(records)) {
+      res.status(400).json({ error: 'Missing or invalid fields' });
       return;
     }
 
-    // Upsert attendance record
-    const result = await pool.query(
-      `INSERT INTO attendance (student_id, section_id, date, status, remarks, marked_by) 
-       VALUES ($1, $2, $3, $4, $5, $6) 
-       ON CONFLICT (student_id, date) 
-       DO UPDATE SET status = EXCLUDED.status, remarks = EXCLUDED.remarks, marked_by = EXCLUDED.marked_by
-       RETURNING *`,
-      [student_id, section_id, date, status, remarks, teacherId]
-    );
+    await client.query('BEGIN');
 
-    res.status(200).json({ message: 'Attendance marked successfully', data: result.rows[0] });
+    for (const record of records) {
+      await client.query(
+        `INSERT INTO attendance (student_id, date, status, marked_by) 
+         VALUES ($1, $2, $3, $4) 
+         ON CONFLICT (student_id, date) 
+         DO UPDATE SET status = EXCLUDED.status, marked_by = EXCLUDED.marked_by`,
+        [record.student_id, date, record.status, teacherId]
+      );
+    }
+
+    await client.query('COMMIT');
+    res.status(200).json({ message: 'Attendance marked successfully' });
   } catch (error) {
-    console.error('Mark attendance error:', error);
+    await client.query('ROLLBACK');
+    console.error('Bulk mark attendance error:', error);
     res.status(500).json({ error: 'Internal server error' });
+  } finally {
+    client.release();
   }
 };
 

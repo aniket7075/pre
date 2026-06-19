@@ -22,8 +22,8 @@ const TeacherDashboard: React.FC<Props> = ({ navigation }) => {
 
   const features = [
     { title: 'My Classes', icon: 'business', screen: 'Classes', color: '#6366F1', bg: 'bg-indigo-50' },
-    { title: 'Mark Attendance', icon: 'checkmark-circle', screen: 'Attendance', color: '#14B8A6', bg: 'bg-teal-50' },
-    { title: 'Assign Homework', icon: 'create', screen: 'Homework', color: '#10B981', bg: 'bg-emerald-50' },
+    { title: 'Mark Attendance', icon: 'checkmark-circle', screen: 'MarkAttendance', color: '#14B8A6', bg: 'bg-teal-50' },
+    { title: 'Assign Homework', icon: 'create', screen: 'CreateHomework', color: '#10B981', bg: 'bg-emerald-50' },
     { title: 'Upload Notes', icon: 'document-text', screen: 'Notes', color: '#F59E0B', bg: 'bg-amber-50' },
     { title: 'Parent Chats', icon: 'chatbubbles', screen: 'Chat', color: '#3B82F6', bg: 'bg-blue-50' },
     { title: 'Notices', icon: 'megaphone', screen: 'Notice', color: '#F43F5E', bg: 'bg-rose-50' },

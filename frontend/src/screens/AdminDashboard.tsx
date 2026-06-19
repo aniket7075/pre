@@ -23,8 +23,8 @@ const AdminDashboard: React.FC<Props> = ({ navigation }) => {
   const features = [
     { title: 'Manage Staff', icon: 'people', screen: 'Staff', color: '#6366F1', bg: 'bg-indigo-50' },
     { title: 'Manage Students', icon: 'school', screen: 'Students', color: '#14B8A6', bg: 'bg-teal-50' },
-    { title: 'Fee Collection', icon: 'cash', screen: 'Fees', color: '#10B981', bg: 'bg-emerald-50' },
-    { title: 'School Notices', icon: 'megaphone', screen: 'Notice', color: '#F59E0B', bg: 'bg-amber-50' },
+    { title: 'Assign Fees', icon: 'cash', screen: 'AssignFee', color: '#10B981', bg: 'bg-emerald-50' },
+    { title: 'Publish Notice', icon: 'megaphone', screen: 'CreateNotice', color: '#F59E0B', bg: 'bg-amber-50' },
     { title: 'Transport', icon: 'bus', screen: 'Transport', color: '#F43F5E', bg: 'bg-rose-50' },
     { title: 'Global Chat', icon: 'chatbubbles', screen: 'Chat', color: '#3B82F6', bg: 'bg-blue-50' },
     { title: 'Progress', icon: 'trending-up', screen: 'Progress', color: '#A855F7', bg: 'bg-purple-50' },

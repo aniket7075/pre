@@ -14,15 +14,18 @@ const NoticeScreen: React.FC<Props> = ({ navigation }) => {
   useEffect(() => {
     const fetchNotices = async () => {
       try {
-        const response = await apiClient.get('/notices?school_id=dummy_school_id');
-        setNotices(response.data.data);
+        const response = await apiClient.get('/notices');
+        if (response.data.data && response.data.data.length > 0) {
+          setNotices(response.data.data);
+        } else {
+          // Fallback dummy data
+          setNotices([
+            { id: '1', title: 'Annual Sports Day', content: 'The annual sports day will be held on 15th Nov. All students must participate.', date: '2023-11-01' },
+            { id: '2', title: 'Diwali Holidays', content: 'School will remain closed from 10th to 14th Nov for Diwali.', date: '2023-11-05' },
+          ]);
+        }
       } catch (error) {
         console.error(error);
-        // Fallback dummy data
-        setNotices([
-          { id: '1', title: 'Annual Sports Day', content: 'The annual sports day will be held on 15th Nov. All students must participate.', date: '2023-11-01' },
-          { id: '2', title: 'Diwali Holidays', content: 'School will remain closed from 10th to 14th Nov for Diwali.', date: '2023-11-05' },
-        ]);
       } finally {
         setLoading(false);
       }

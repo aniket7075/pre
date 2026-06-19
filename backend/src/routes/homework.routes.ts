@@ -11,6 +11,6 @@ router.use(authenticate);
 router.post('/', authorize(['super_admin', 'school_admin', 'teacher']), createHomework);
 
 // Anyone can view homework for their section
-router.get('/:section_id', getSectionHomework);
+router.get('/:grade', getSectionHomework);
 
 export default router;

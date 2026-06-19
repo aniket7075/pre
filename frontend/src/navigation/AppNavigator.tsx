@@ -18,6 +18,11 @@ import TeacherDashboard from '../screens/TeacherDashboard';
 import ChatScreen from '../screens/ChatScreen';
 import ResultScreen from '../screens/ResultScreen';
 import ProgressDashboard from '../screens/ProgressDashboard';
+import StaffScreen from '../screens/StaffScreen';
+import StudentsScreen from '../screens/StudentsScreen';
+import AddParentStudentScreen from '../screens/AddParentStudentScreen';
+import ClassesScreen from '../screens/ClassesScreen';
+import NotesScreen from '../screens/NotesScreen';
 
 const Stack = createNativeStackNavigator();
 
@@ -54,6 +59,11 @@ const AppNavigator = () => {
             <Stack.Screen name="Chat" component={ChatScreen} />
             <Stack.Screen name="Results" component={ResultScreen} />
             <Stack.Screen name="Progress" component={ProgressDashboard} />
+            <Stack.Screen name="Staff" component={StaffScreen} />
+            <Stack.Screen name="Students" component={StudentsScreen} />
+            <Stack.Screen name="AddParentStudent" component={AddParentStudentScreen} />
+            <Stack.Screen name="Classes" component={ClassesScreen} />
+            <Stack.Screen name="Notes" component={NotesScreen} />
           </>
         ) : (
           // Auth Stack

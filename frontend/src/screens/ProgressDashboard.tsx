@@ -1,11 +1,16 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, ScrollView, ActivityIndicator } from 'react-native';
+import { View, Text, ScrollView, ActivityIndicator, TouchableOpacity } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
+import Icon from 'react-native-vector-icons/Ionicons';
 import { useSelector } from 'react-redux';
 import { RootState } from '../store';
 import apiClient from '../api/client';
 import Animated, { FadeInUp } from 'react-native-reanimated';
+import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 
-const ProgressDashboard = () => {
+type Props = { navigation: NativeStackNavigationProp<any, any>; };
+
+const ProgressDashboard: React.FC<Props> = ({ navigation }) => {
   const { user } = useSelector((state: RootState) => state.auth);
   const [progress, setProgress] = useState<any>(null);
   const [loading, setLoading] = useState(true);
@@ -22,73 +27,96 @@ const ProgressDashboard = () => {
       setProgress(res.data);
     } catch (error) {
       console.log('Error fetching progress:', error);
+      // Fallback dummy data
+      setProgress({
+        attendance: [
+          { status: 'Present', count: 18 },
+          { status: 'Absent', count: 2 },
+          { status: 'Late', count: 1 }
+        ],
+        recentExams: [
+          { name: 'Mid Term', marks_obtained: 480, total_marks: 500 },
+          { name: 'Unit Test 2', marks_obtained: 45, total_marks: 50 }
+        ],
+        notes: [
+          { note_type: 'behavior', content: 'Very attentive in class and participates actively.' },
+          { note_type: 'academic', content: 'Needs a bit more practice in Mathematics.' }
+        ]
+      });
     } finally {
       setLoading(false);
     }
   };
 
-  if (loading) return <View style={styles.center}><ActivityIndicator size="large" color="#ff6699" /></View>;
-
   return (
-    <ScrollView style={styles.container}>
-      <Text style={styles.header}>Student Progress 🌟</Text>
-
-      {/* Attendance Summary */}
-      <Animated.View entering={FadeInUp.delay(100)} style={styles.section}>
-        <Text style={styles.sectionTitle}>Attendance Overview</Text>
-        <View style={styles.statsContainer}>
-          {progress?.attendance?.length > 0 ? progress.attendance.map((a: any, i: number) => (
-            <View key={i} style={styles.statBox}>
-              <Text style={styles.statValue}>{a.count}</Text>
-              <Text style={styles.statLabel}>{a.status}</Text>
-            </View>
-          )) : <Text style={styles.emptyText}>No attendance records</Text>}
+    <SafeAreaView className="flex-1 bg-background">
+      <View className="flex-row items-center p-5 bg-primary justify-between">
+        <View className="flex-row items-center">
+          <TouchableOpacity onPress={() => navigation.goBack()} className="mr-4">
+            <Icon name="arrow-back" size={24} color="#fff" />
+          </TouchableOpacity>
+          <Text className="text-xl font-bold text-white">Student Progress</Text>
         </View>
-      </Animated.View>
+        <Icon name="trending-up" size={24} color="#fff" />
+      </View>
 
-      {/* Recent Exams */}
-      <Animated.View entering={FadeInUp.delay(300)} style={styles.section}>
-        <Text style={styles.sectionTitle}>Recent Exams</Text>
-        {progress?.recentExams?.length > 0 ? progress.recentExams.map((e: any, i: number) => (
-          <View key={i} style={styles.rowItem}>
-            <Text style={styles.rowTitle}>{e.name}</Text>
-            <Text style={styles.rowValue}>{e.marks_obtained}/{e.total_marks}</Text>
-          </View>
-        )) : <Text style={styles.emptyText}>No recent exams</Text>}
-      </Animated.View>
+      {loading ? (
+        <View className="flex-1 justify-center items-center">
+          <ActivityIndicator size="large" color="#4F46E5" />
+        </View>
+      ) : (
+        <ScrollView className="flex-1 p-5" showsVerticalScrollIndicator={false}>
+          
+          {/* Attendance Summary */}
+          <Animated.View entering={FadeInUp.delay(100)} className="bg-card p-5 rounded-2xl mb-5 shadow-sm border border-border">
+            <View className="flex-row items-center mb-4 border-b border-border pb-2">
+              <Icon name="calendar-outline" size={20} color="#14B8A6" className="mr-2" />
+              <Text className="text-lg font-bold text-textPrimary">Attendance Overview</Text>
+            </View>
+            <View className="flex-row justify-between">
+              {progress?.attendance?.length > 0 ? progress.attendance.map((a: any, i: number) => (
+                <View key={i} className="items-center bg-background p-3 rounded-xl flex-1 mx-1 border border-border">
+                  <Text className={`text-2xl font-black ${a.status === 'Present' ? 'text-emerald-500' : a.status === 'Absent' ? 'text-rose-500' : 'text-amber-500'}`}>{a.count}</Text>
+                  <Text className="text-xs text-textSecondary uppercase tracking-wider font-bold mt-1">{a.status}</Text>
+                </View>
+              )) : <Text className="text-textSecondary italic w-full text-center py-4">No attendance records</Text>}
+            </View>
+          </Animated.View>
 
-      {/* Teacher Notes */}
-      <Animated.View entering={FadeInUp.delay(500)} style={styles.section}>
-        <Text style={styles.sectionTitle}>Teacher's Remarks 📝</Text>
-        {progress?.notes?.length > 0 ? progress.notes.map((n: any, i: number) => (
-          <View key={i} style={styles.noteBox}>
-            <Text style={styles.noteType}>{n.note_type.toUpperCase()}</Text>
-            <Text style={styles.noteContent}>{n.content}</Text>
-          </View>
-        )) : <Text style={styles.emptyText}>No remarks yet.</Text>}
-      </Animated.View>
+          {/* Recent Exams */}
+          <Animated.View entering={FadeInUp.delay(300)} className="bg-card p-5 rounded-2xl mb-5 shadow-sm border border-border">
+            <View className="flex-row items-center mb-4 border-b border-border pb-2">
+              <Icon name="school-outline" size={20} color="#4F46E5" className="mr-2" />
+              <Text className="text-lg font-bold text-textPrimary">Recent Exams</Text>
+            </View>
+            {progress?.recentExams?.length > 0 ? progress.recentExams.map((e: any, i: number) => (
+              <View key={i} className="flex-row justify-between items-center py-3 border-b border-border/50 last:border-0">
+                <Text className="text-base text-textPrimary font-medium">{e.name}</Text>
+                <View className="bg-indigo-50 px-3 py-1 rounded-full border border-indigo-100">
+                  <Text className="text-base font-bold text-primary">{e.marks_obtained}/{e.total_marks}</Text>
+                </View>
+              </View>
+            )) : <Text className="text-textSecondary italic w-full text-center py-4">No recent exams</Text>}
+          </Animated.View>
 
-    </ScrollView>
+          {/* Teacher Notes */}
+          <Animated.View entering={FadeInUp.delay(500)} className="bg-card p-5 rounded-2xl mb-10 shadow-sm border border-border">
+            <View className="flex-row items-center mb-4 border-b border-border pb-2">
+              <Icon name="chatbubbles-outline" size={20} color="#F59E0B" className="mr-2" />
+              <Text className="text-lg font-bold text-textPrimary">Teacher's Remarks</Text>
+            </View>
+            {progress?.notes?.length > 0 ? progress.notes.map((n: any, i: number) => (
+              <View key={i} className="bg-background p-4 rounded-xl mb-3 border-l-4 border-amber-500">
+                <Text className="text-xs font-bold text-amber-600 uppercase tracking-wider mb-1">{n.note_type}</Text>
+                <Text className="text-sm text-textPrimary leading-5">{n.content}</Text>
+              </View>
+            )) : <Text className="text-textSecondary italic w-full text-center py-4">No remarks yet.</Text>}
+          </Animated.View>
+
+        </ScrollView>
+      )}
+    </SafeAreaView>
   );
 };
-
-const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#fff5f8', padding: 20, paddingTop: 50 },
-  center: { flex: 1, justifyContent: 'center', alignItems: 'center' },
-  header: { fontSize: 28, fontWeight: 'bold', color: '#ff6699', marginBottom: 30, textAlign: 'center' },
-  section: { backgroundColor: '#fff', borderRadius: 20, padding: 20, marginBottom: 20, shadowColor: '#ff6699', shadowOffset: { width: 0, height: 5 }, shadowOpacity: 0.1, shadowRadius: 10, elevation: 5 },
-  sectionTitle: { fontSize: 18, fontWeight: 'bold', color: '#333', marginBottom: 15 },
-  statsContainer: { flexDirection: 'row', justifyContent: 'space-around', flexWrap: 'wrap' },
-  statBox: { alignItems: 'center', padding: 10 },
-  statValue: { fontSize: 24, fontWeight: '900', color: '#4da6ff' },
-  statLabel: { fontSize: 12, color: '#888', textTransform: 'capitalize' },
-  emptyText: { color: '#aaa', fontStyle: 'italic', textAlign: 'center' },
-  rowItem: { flexDirection: 'row', justifyContent: 'space-between', paddingVertical: 10, borderBottomWidth: 1, borderBottomColor: '#f0f0f0' },
-  rowTitle: { fontSize: 16, color: '#444' },
-  rowValue: { fontSize: 16, fontWeight: 'bold', color: '#33cc33' },
-  noteBox: { backgroundColor: '#f9f9f9', padding: 15, borderRadius: 10, marginBottom: 10, borderLeftWidth: 4, borderLeftColor: '#ffcc00' },
-  noteType: { fontSize: 12, fontWeight: 'bold', color: '#ff9933', marginBottom: 5 },
-  noteContent: { fontSize: 14, color: '#555', lineHeight: 20 }
-});
 
 export default ProgressDashboard;

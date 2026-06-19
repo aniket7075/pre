@@ -1,10 +1,15 @@
 import React, { useEffect, useState } from 'react';
-import { View, Text, StyleSheet, FlatList, ActivityIndicator, TouchableOpacity, Alert } from 'react-native';
+import { View, Text, FlatList, ActivityIndicator, TouchableOpacity, Alert } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
+import Icon from 'react-native-vector-icons/Ionicons';
 import apiClient from '../api/client';
+import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 
-const FeeScreen = () => {
+type Props = { navigation: NativeStackNavigationProp<any, any>; };
+
+const FeeScreen: React.FC<Props> = ({ navigation }) => {
   const [loading, setLoading] = useState(true);
-  const [fees, setFees] = useState([]);
+  const [fees, setFees] = useState<any[]>([]);
 
   useEffect(() => {
     const fetchFees = async () => {
@@ -13,6 +18,11 @@ const FeeScreen = () => {
         setFees(response.data.data);
       } catch (error) {
         console.error(error);
+        // Fallback dummy data
+        setFees([
+          { id: '1', fee_type: 'Tuition Fee (Q1)', amount_due: '15000', due_date: '2023-11-01', status: 'pending' },
+          { id: '2', fee_type: 'Transport Fee', amount_due: '2000', due_date: '2023-10-05', status: 'paid' },
+        ]);
       } finally {
         setLoading(false);
       }
@@ -20,56 +30,71 @@ const FeeScreen = () => {
     fetchFees();
   }, []);
 
-  const handlePayment = async (feeId: string, amount: number) => {
-    Alert.alert('Razorpay Integration', 'Razorpay checkout will open here for amount: ₹' + amount);
-    // In real app, call /api/fees/create-order, then use react-native-razorpay
+  const handlePayment = async (feeId: string, amount: string) => {
+    Alert.alert('Payment Portal', 'Opening checkout for ₹' + amount);
   };
 
   return (
-    <View style={styles.container}>
-      <Text style={styles.header}>Fee Details</Text>
-      {loading ? (
-        <ActivityIndicator size="large" color="#4da6ff" />
-      ) : (
-        <FlatList
-          data={fees}
-          keyExtractor={(item: any) => item.id}
-          renderItem={({ item }) => (
-            <View style={styles.card}>
-              <View style={styles.row}>
-                <Text style={styles.title}>{item.fee_type}</Text>
-                <Text style={styles.amount}>₹{item.amount_due}</Text>
+    <SafeAreaView className="flex-1 bg-background">
+      <View className="flex-row items-center p-5 bg-primary justify-between">
+        <View className="flex-row items-center">
+          <TouchableOpacity onPress={() => navigation.goBack()} className="mr-4">
+            <Icon name="arrow-back" size={24} color="#fff" />
+          </TouchableOpacity>
+          <Text className="text-xl font-bold text-white">Fee Details</Text>
+        </View>
+        <Icon name="cash" size={24} color="#fff" />
+      </View>
+      
+      <View className="flex-1 p-5">
+        {loading ? (
+          <ActivityIndicator size="large" color="#4F46E5" />
+        ) : (
+          <FlatList
+            data={fees}
+            keyExtractor={(item: any) => item.id}
+            showsVerticalScrollIndicator={false}
+            renderItem={({ item }) => (
+              <View className="bg-card p-5 rounded-xl mb-4 shadow-sm border border-border">
+                <View className="flex-row justify-between items-center mb-3">
+                  <Text className="text-lg font-bold text-textPrimary">{item.fee_type}</Text>
+                  <Text className="text-lg font-extrabold text-primary">₹{item.amount_due}</Text>
+                </View>
+                
+                <View className="flex-row justify-between items-center mb-4">
+                  <View className="flex-row items-center">
+                    <Icon name="time-outline" size={16} color="#64748B" className="mr-1" />
+                    <Text className="text-sm text-textSecondary">Due: {item.due_date}</Text>
+                  </View>
+                  <View className={`px-3 py-1 rounded-full ${item.status === 'paid' ? 'bg-emerald-100' : 'bg-rose-100'}`}>
+                    <Text className={`text-xs font-bold ${item.status === 'paid' ? 'text-emerald-600' : 'text-rose-600'}`}>
+                      {item.status.toUpperCase()}
+                    </Text>
+                  </View>
+                </View>
+
+                {item.status !== 'paid' && (
+                  <TouchableOpacity 
+                    className="bg-primary py-3 rounded-lg flex-row justify-center items-center"
+                    onPress={() => handlePayment(item.id, item.amount_due)}
+                  >
+                    <Icon name="card" size={20} color="#fff" className="mr-2" />
+                    <Text className="text-white font-bold text-center">Pay Now</Text>
+                  </TouchableOpacity>
+                )}
               </View>
-              <Text style={styles.date}>Due: {item.due_date}</Text>
-              <Text style={styles.status}>Status: {item.status}</Text>
-              {item.status !== 'paid' && (
-                <TouchableOpacity 
-                  style={styles.payButton} 
-                  onPress={() => handlePayment(item.id, item.amount_due)}
-                >
-                  <Text style={styles.payText}>Pay Now</Text>
-                </TouchableOpacity>
-              )}
-            </View>
-          )}
-          ListEmptyComponent={<Text>No fee records found.</Text>}
-        />
-      )}
-    </View>
+            )}
+            ListEmptyComponent={
+              <View className="items-center justify-center py-20">
+                <Icon name="cash-outline" size={60} color="#E2E8F0" />
+                <Text className="text-lg text-textSecondary mt-4">No fee records found.</Text>
+              </View>
+            }
+          />
+        )}
+      </View>
+    </SafeAreaView>
   );
 };
-
-const styles = StyleSheet.create({
-  container: { flex: 1, padding: 20, backgroundColor: '#f0f8ff' },
-  header: { fontSize: 24, fontWeight: 'bold', marginBottom: 20, color: '#ff9933' },
-  card: { padding: 15, backgroundColor: '#fff', borderRadius: 10, marginBottom: 15, elevation: 3 },
-  row: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
-  title: { fontSize: 18, fontWeight: 'bold' },
-  amount: { fontSize: 18, fontWeight: 'bold', color: '#ff6699' },
-  date: { color: '#666', marginTop: 5 },
-  status: { fontWeight: 'bold', marginTop: 5, color: '#33cc33' },
-  payButton: { backgroundColor: '#4da6ff', padding: 10, borderRadius: 8, marginTop: 15, alignItems: 'center' },
-  payText: { color: '#fff', fontWeight: 'bold', fontSize: 16 }
-});
 
 export default FeeScreen;

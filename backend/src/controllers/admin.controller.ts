@@ -52,3 +52,42 @@ export const getAllStudents = async (req: AuthRequest, res: Response): Promise<v
     res.status(500).json({ error: 'Internal server error' });
   }
 };
+
+// Add new Family (Parent + Multiple Students)
+export const addFamily = async (req: AuthRequest, res: Response): Promise<void> => {
+  const client = await pool.connect();
+  try {
+    const { parentName, contactNumber, email, children } = req.body;
+
+    if (!parentName || !contactNumber || !children || children.length === 0) {
+      res.status(400).json({ error: 'Missing required fields' });
+      return;
+    }
+
+    await client.query('BEGIN');
+
+    // Insert Parent
+    const parentResult = await client.query(
+      `INSERT INTO parents (full_name, contact_number, email) VALUES ($1, $2, $3) RETURNING id`,
+      [parentName, contactNumber, email]
+    );
+    const parentId = parentResult.rows[0].id;
+
+    // Insert Children
+    for (const child of children) {
+      await client.query(
+        `INSERT INTO students (parent_id, full_name, grade, age) VALUES ($1, $2, $3, $4)`,
+        [parentId, child.name, child.grade, child.age ? parseInt(child.age) : null]
+      );
+    }
+
+    await client.query('COMMIT');
+    res.status(201).json({ message: 'Family added successfully', parentId });
+  } catch (error) {
+    await client.query('ROLLBACK');
+    console.error('Error adding family:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  } finally {
+    client.release();
+  }
+};

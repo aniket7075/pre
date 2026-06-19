@@ -1,10 +1,12 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { View, Text, TouchableOpacity, Dimensions, ScrollView, Platform } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { useDispatch } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 import { logout } from '../store/slices/authSlice';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import Icon from 'react-native-vector-icons/Ionicons';
+import Animated, { FadeInDown, FadeInUp, useSharedValue, useAnimatedStyle, withSpring, withTiming } from 'react-native-reanimated';
+import { RootState } from '../store';
 
 const { width } = Dimensions.get('window');
 
@@ -15,6 +17,7 @@ type Props = {
 const AdminDashboard: React.FC<Props> = ({ navigation }) => {
   const dispatch = useDispatch();
   const insets = useSafeAreaInsets();
+  const { user } = useSelector((state: RootState) => state.auth);
 
   const handleLogout = () => {
     dispatch(logout() as any);
@@ -22,11 +25,11 @@ const AdminDashboard: React.FC<Props> = ({ navigation }) => {
 
   const features = [
     { title: 'Manage Staff', icon: 'people', screen: 'Staff', color: '#6366F1', bg: 'bg-indigo-50' },
-    { title: 'Manage Students', icon: 'school', screen: 'Students', color: '#14B8A6', bg: 'bg-teal-50' },
+    { title: 'Students', icon: 'school', screen: 'Students', color: '#14B8A6', bg: 'bg-teal-50' },
     { title: 'Assign Fees', icon: 'cash', screen: 'AssignFee', color: '#10B981', bg: 'bg-emerald-50' },
-    { title: 'Publish Notice', icon: 'megaphone', screen: 'CreateNotice', color: '#F59E0B', bg: 'bg-amber-50' },
+    { title: 'Notice', icon: 'megaphone', screen: 'CreateNotice', color: '#F59E0B', bg: 'bg-amber-50' },
     { title: 'Transport', icon: 'bus', screen: 'Transport', color: '#F43F5E', bg: 'bg-rose-50' },
-    { title: 'Global Chat', icon: 'chatbubbles', screen: 'ChatList', color: '#3B82F6', bg: 'bg-blue-50' },
+    { title: 'Chat', icon: 'chatbubbles', screen: 'ChatList', color: '#3B82F6', bg: 'bg-blue-50' },
     { title: 'Leaves', icon: 'document-text', screen: 'Leaves', color: '#8B5CF6', bg: 'bg-purple-50' },
     { title: 'Timetable', icon: 'calendar-outline', screen: 'Timetable', color: '#EC4899', bg: 'bg-pink-50' },
     { title: 'Gallery', icon: 'images', screen: 'Gallery', color: '#F59E0B', bg: 'bg-amber-50' },
@@ -35,66 +38,82 @@ const AdminDashboard: React.FC<Props> = ({ navigation }) => {
   ];
 
   return (
-    <View className="flex-1 bg-white" style={{ paddingTop: Math.max(insets.top, 20) }}>
-      {/* Sleek Modern Header */}
-      <View className="px-6 py-4 flex-row justify-between items-center mb-2">
-        <View>
-          <Text className="text-textSecondary text-sm font-semibold tracking-widest uppercase">Admin Panel</Text>
-          <Text className="text-textPrimary text-3xl font-black mt-1">Dashboard</Text>
+    <View className="flex-1 bg-slate-50" style={{ paddingTop: Math.max(insets.top, 10) }}>
+      
+      {/* Decorative Background Blob */}
+      <View className="absolute w-[500px] h-[500px] bg-blue-100 rounded-full opacity-50 -top-20 -right-20" />
+
+      {/* Modern Profile Header */}
+      <Animated.View entering={FadeInDown.duration(800)} className="px-6 py-4 flex-row justify-between items-center mb-4 z-10">
+        <View className="flex-row items-center flex-1">
+          <View className="w-14 h-14 bg-white rounded-full items-center justify-center shadow-sm mr-4" style={{ elevation: 5, shadowColor: '#3B82F6', shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.2 }}>
+            <Text className="text-2xl font-black text-blue-600">A</Text>
+          </View>
+          <View>
+            <Text className="text-gray-500 text-xs font-bold tracking-widest uppercase">Admin Portal</Text>
+            <Text className="text-slate-800 text-2xl font-black mt-1">Dashboard</Text>
+          </View>
         </View>
         <TouchableOpacity 
           onPress={handleLogout} 
-          className="bg-gray-100 p-3 rounded-full shadow-sm"
-          style={{ shadowColor: '#000', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.05, shadowRadius: 3, elevation: 2 }}
+          className="bg-white p-3 rounded-full"
+          style={{ shadowColor: '#EF4444', shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.2, shadowRadius: 8, elevation: 4 }}
         >
-          <Icon name="log-out-outline" size={24} color="#EF4444" />
+          <Icon name="power" size={24} color="#EF4444" />
         </TouchableOpacity>
-      </View>
+      </Animated.View>
 
-      <ScrollView className="flex-1 px-5" showsVerticalScrollIndicator={false}>
-        {/* Prominent Quick Action */}
-        <TouchableOpacity 
-          className="bg-primary w-full p-5 rounded-3xl flex-row items-center justify-between mb-8"
-          style={{ shadowColor: '#4F46E5', shadowOffset: { width: 0, height: 8 }, shadowOpacity: 0.3, shadowRadius: 10, elevation: 8 }}
-          onPress={() => navigation.navigate('AddParentStudent')}
-          activeOpacity={0.8}
-        >
-          <View className="flex-1">
-            <Text className="text-white/80 text-sm font-bold uppercase tracking-wider mb-1">New Admission</Text>
-            <Text className="text-white text-xl font-bold">Add Parent & Students</Text>
-          </View>
-          <View className="bg-white/20 p-3 rounded-2xl ml-4">
-            <Icon name="person-add" size={28} color="#fff" />
-          </View>
-        </TouchableOpacity>
+      <ScrollView className="flex-1 px-6 z-10" showsVerticalScrollIndicator={false} contentContainerStyle={{ paddingBottom: 40 }}>
+        
+        {/* Prominent Quick Action Card */}
+        <Animated.View entering={FadeInUp.delay(200).duration(800)}>
+          <TouchableOpacity 
+            className="bg-blue-600 w-full p-6 rounded-[30px] flex-row items-center justify-between mb-8"
+            style={{ shadowColor: '#2563EB', shadowOffset: { width: 0, height: 10 }, shadowOpacity: 0.4, shadowRadius: 15, elevation: 10 }}
+            onPress={() => navigation.navigate('AddParentStudent')}
+            activeOpacity={0.9}
+          >
+            <View className="flex-1">
+              <View className="bg-white/20 self-start px-3 py-1 rounded-full mb-2">
+                <Text className="text-white text-xs font-bold uppercase tracking-wider">Admission</Text>
+              </View>
+              <Text className="text-white text-2xl font-black">Add New Student</Text>
+              <Text className="text-blue-100 text-sm font-semibold mt-1">Register parent & child</Text>
+            </View>
+            <View className="bg-white p-4 rounded-full ml-4" style={{ shadowColor: '#000', shadowOpacity: 0.1, shadowRadius: 5, elevation: 5 }}>
+              <Icon name="person-add" size={28} color="#2563EB" />
+            </View>
+          </TouchableOpacity>
+        </Animated.View>
 
-        <Text className="text-textPrimary text-xl font-bold mb-4 ml-1">Quick Actions</Text>
+        <Animated.Text entering={FadeInUp.delay(300).duration(800)} className="text-slate-800 text-xl font-black mb-4 ml-2 tracking-wide">
+          Management Tools
+        </Animated.Text>
 
         {/* Modern Grid */}
-        <View className="flex-row flex-wrap justify-between pb-10">
+        <View className="flex-row flex-wrap justify-between">
           {features.map((item, index) => (
-            <TouchableOpacity 
-              key={index} 
-              className="bg-white w-[48%] p-5 rounded-3xl items-center mb-4"
-              style={{ 
-                shadowColor: '#000', 
-                shadowOffset: { width: 0, height: 4 }, 
-                shadowOpacity: 0.06, 
-                shadowRadius: 12, 
-                elevation: 3,
-                borderWidth: 1,
-                borderColor: 'rgba(0,0,0,0.02)'
-              }}
-              onPress={() => navigation.navigate(item.screen)}
-              activeOpacity={0.7}
-            >
-              <View className={`${item.bg} p-4 rounded-2xl mb-3`}>
-                <Icon name={item.icon} size={30} color={item.color} />
-              </View>
-              <Text className="text-sm font-bold text-textPrimary text-center">
-                {item.title}
-              </Text>
-            </TouchableOpacity>
+            <Animated.View key={index} entering={FadeInUp.delay(400 + (index * 50)).duration(600)} className="w-[48%] mb-4">
+              <TouchableOpacity 
+                className="bg-white p-5 rounded-[28px] items-center"
+                style={{ 
+                  shadowColor: item.color, 
+                  shadowOffset: { width: 0, height: 8 }, 
+                  shadowOpacity: 0.1, 
+                  shadowRadius: 12, 
+                  elevation: 5,
+                }}
+                onPress={() => navigation.navigate(item.screen)}
+                activeOpacity={0.8}
+              >
+                <View className={`${item.bg} w-16 h-16 rounded-full items-center justify-center mb-3`}>
+                  <Icon name={item.icon} size={28} color={item.color} />
+                </View>
+                <Text className="text-sm font-bold text-slate-700 text-center">
+                  {item.title}
+                </Text>
+              </TouchableOpacity>
+            </Animated.View>
           ))}
         </View>
       </ScrollView>
@@ -103,4 +122,3 @@ const AdminDashboard: React.FC<Props> = ({ navigation }) => {
 };
 
 export default AdminDashboard;
-

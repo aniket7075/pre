@@ -13,26 +13,36 @@ type AttendanceRecord = { student_id: string; status: 'Present' | 'Absent' | 'Le
 const MarkAttendanceScreen: React.FC<Props> = ({ navigation }) => {
   const insets = useSafeAreaInsets();
   const [loading, setLoading] = useState(true);
-  const [students, setStudents] = useState<Student[]>([]);
+  const [allStudents, setAllStudents] = useState<Student[]>([]);
+  const [grades, setGrades] = useState<string[]>([]);
+  const [selectedGrade, setSelectedGrade] = useState<string | null>(null);
+  
   const [attendance, setAttendance] = useState<Record<string, AttendanceRecord>>({});
   const [saving, setSaving] = useState(false);
-
-  // For this prototype, we assume the teacher is assigned to "1st Grade"
-  const selectedGrade = '1st Grade';
   
   // Date format: YYYY-MM-DD
   const today = new Date().toISOString().split('T')[0];
 
   useEffect(() => {
-    fetchClassStudents();
+    fetchAllStudents();
   }, []);
 
-  const fetchClassStudents = async () => {
+  const fetchAllStudents = async () => {
     try {
       setLoading(true);
-      const response = await apiClient.get(`/attendance/class/${selectedGrade}`);
-      const studentsList: Student[] = response.data.data;
-      setStudents(studentsList);
+      // Fetch all students (Teachers have access to this route)
+      const response = await apiClient.get('/admin/students');
+      const studentsList: Student[] = response.data;
+      
+      setAllStudents(studentsList);
+
+      // Extract unique grades
+      const uniqueGrades = Array.from(new Set(studentsList.map(s => s.grade))).filter(Boolean);
+      setGrades(uniqueGrades);
+      
+      if (uniqueGrades.length > 0) {
+        setSelectedGrade(uniqueGrades[0]);
+      }
 
       // Default everyone to 'Present'
       const defaultAttendance: Record<string, AttendanceRecord> = {};
@@ -43,7 +53,7 @@ const MarkAttendanceScreen: React.FC<Props> = ({ navigation }) => {
 
     } catch (error) {
       console.error(error);
-      Alert.alert('Error', 'Failed to fetch students for your class.');
+      Alert.alert('Error', 'Failed to fetch students.');
     } finally {
       setLoading(false);
     }
@@ -63,13 +73,15 @@ const MarkAttendanceScreen: React.FC<Props> = ({ navigation }) => {
   const handleSave = async () => {
     try {
       setSaving(true);
-      const records = Object.values(attendance);
+      // Only submit attendance for the currently selected grade!
+      const currentGradeStudents = allStudents.filter(s => s.grade === selectedGrade);
+      const records = currentGradeStudents.map(s => attendance[s.id]);
+      
       await apiClient.post('/attendance/mark', {
         date: today,
         records
       });
-      Alert.alert('Success', 'Attendance marked successfully!');
-      navigation.goBack();
+      Alert.alert('Success', `Attendance marked successfully for ${selectedGrade}!`);
     } catch (error) {
       console.error(error);
       Alert.alert('Error', 'Failed to mark attendance.');
@@ -90,6 +102,8 @@ const MarkAttendanceScreen: React.FC<Props> = ({ navigation }) => {
     return 'airplane';
   };
 
+  const filteredStudents = allStudents.filter(s => s.grade === selectedGrade);
+
   return (
     <View className="flex-1 bg-white" style={{ paddingTop: Math.max(insets.top, 10) }}>
       <View className="flex-row items-center px-6 py-4 mb-2">
@@ -102,23 +116,52 @@ const MarkAttendanceScreen: React.FC<Props> = ({ navigation }) => {
         </View>
       </View>
       
-      <View className="flex-1 px-5">
-        <View className="bg-indigo-50 p-4 rounded-2xl mb-4 flex-row items-center">
-          <Icon name="business" size={24} color="#4F46E5" className="mr-3" />
-          <Text className="text-primary font-bold text-lg">{selectedGrade} Students</Text>
+      {/* Grade Selector Tabs */}
+      {!loading && grades.length > 0 && (
+        <View className="mb-4">
+          <FlatList
+            data={grades}
+            horizontal
+            showsHorizontalScrollIndicator={false}
+            keyExtractor={item => item}
+            contentContainerStyle={{ paddingHorizontal: 20 }}
+            renderItem={({ item }) => (
+              <TouchableOpacity 
+                onPress={() => setSelectedGrade(item)}
+                className={`mr-3 px-5 py-2.5 rounded-full border ${selectedGrade === item ? 'bg-indigo-600 border-indigo-600' : 'bg-slate-50 border-slate-200'}`}
+              >
+                <Text className={`font-bold ${selectedGrade === item ? 'text-white' : 'text-slate-600'}`}>
+                  {item}
+                </Text>
+              </TouchableOpacity>
+            )}
+          />
         </View>
+      )}
+
+      <View className="flex-1 px-5">
+        {selectedGrade && (
+          <View className="bg-indigo-50 p-4 rounded-2xl mb-4 flex-row items-center">
+            <Icon name="business" size={24} color="#4F46E5" className="mr-3" />
+            <Text className="text-primary font-bold text-lg">{selectedGrade} Students</Text>
+          </View>
+        )}
 
         {loading ? (
           <ActivityIndicator size="large" color="#4F46E5" className="mt-10" />
-        ) : students.length === 0 ? (
+        ) : allStudents.length === 0 ? (
           <View className="items-center justify-center py-20">
             <Icon name="people-outline" size={60} color="#E2E8F0" />
-            <Text className="text-lg text-textSecondary mt-4 text-center">No students found for this class.</Text>
-            <Text className="text-sm text-textSecondary text-center px-4 mt-2">Add students to {selectedGrade} first using the Admin panel.</Text>
+            <Text className="text-lg text-textSecondary mt-4 text-center">No students found.</Text>
+            <Text className="text-sm text-textSecondary text-center px-4 mt-2">Add students in the Admin panel first.</Text>
+          </View>
+        ) : filteredStudents.length === 0 ? (
+          <View className="items-center justify-center py-20">
+            <Text className="text-slate-500">No students in this class.</Text>
           </View>
         ) : (
           <FlatList
-            data={students}
+            data={filteredStudents}
             keyExtractor={(item) => item.id}
             showsVerticalScrollIndicator={false}
             contentContainerStyle={{ paddingBottom: 100 }}
@@ -151,7 +194,7 @@ const MarkAttendanceScreen: React.FC<Props> = ({ navigation }) => {
         )}
       </View>
 
-      {!loading && students.length > 0 && (
+      {!loading && filteredStudents.length > 0 && (
         <View className="absolute bottom-5 left-5 right-5">
           <TouchableOpacity 
             className={`p-4 rounded-2xl items-center flex-row justify-center ${saving ? 'bg-gray-400' : 'bg-primary'}`}

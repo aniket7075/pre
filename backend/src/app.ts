@@ -1,6 +1,7 @@
 import express from 'express';
 import cors from 'cors';
 import dotenv from 'dotenv';
+import path from 'path';
 
 import authRoutes from './routes/auth.routes';
 import userRoutes from './routes/user.routes';
@@ -20,6 +21,7 @@ import examRoutes from './routes/exam.routes';
 import lessonPlanRoutes from './routes/lesson_plan.routes';
 import libraryRoutes from './routes/library.routes';
 import certificateRoutes from './routes/certificate.routes';
+import classesRoutes from './routes/classes.routes';
 
 dotenv.config();
 
@@ -28,6 +30,8 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
+
+app.use('/uploads', express.static(path.join(process.cwd(), 'uploads')));
 
 app.get('/api/health', (req, res) => {
   res.status(200).json({ status: 'success', message: 'Pre-School API is running' });
@@ -51,6 +55,7 @@ app.use('/api/exams', examRoutes);
 app.use('/api/lesson-plans', lessonPlanRoutes);
 app.use('/api/library', libraryRoutes);
 app.use('/api/certificates', certificateRoutes);
+app.use('/api/classes', classesRoutes);
 
 app.use((err: any, req: express.Request, res: express.Response, next: express.NextFunction) => {
   console.error(err.stack);

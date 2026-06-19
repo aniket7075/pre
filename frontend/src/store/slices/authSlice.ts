@@ -9,6 +9,7 @@ export interface User {
   firstName: string;
   lastName: string;
   profilePictureUrl?: string;
+  department?: string;
 }
 
 interface AuthState {

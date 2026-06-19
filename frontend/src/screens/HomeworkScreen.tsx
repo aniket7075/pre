@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { View, Text, FlatList, ActivityIndicator, TouchableOpacity } from 'react-native';
+import { View, Text, FlatList, ActivityIndicator, TouchableOpacity, Linking } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import Icon from 'react-native-vector-icons/Ionicons';
 import apiClient from '../api/client';
@@ -56,12 +56,58 @@ const HomeworkScreen: React.FC<Props> = ({ navigation }) => {
             renderItem={({ item }) => (
               <View className="bg-card p-5 rounded-xl mb-4 shadow-sm border border-border">
                 <View className="flex-row justify-between items-center mb-2">
-                  <Text className="text-lg font-bold text-primary">{item.title}</Text>
+                  <View className="flex-1 mr-2">
+                    {item.subject && (
+                      <Text className="text-xs font-bold text-indigo-600 uppercase tracking-wider mb-1">{item.subject}</Text>
+                    )}
+                    <Text className="text-lg font-bold text-primary">{item.title}</Text>
+                  </View>
                   <View className="bg-amber-100 px-3 py-1 rounded-full">
                     <Text className="text-xs font-bold text-amber-600">{item.due_date}</Text>
                   </View>
                 </View>
-                <Text className="text-textSecondary leading-6">{item.description}</Text>
+                <Text className="text-textSecondary leading-6 mb-3">{item.description}</Text>
+                
+                {/* Reference Link */}
+                {item.reference_link && (
+                  <TouchableOpacity 
+                    className="flex-row items-center bg-blue-50 p-3 rounded-lg mb-2"
+                    onPress={() => Linking.openURL(item.reference_link)}
+                  >
+                    <Icon name="link" size={18} color="#2563EB" className="mr-2" />
+                    <Text className="text-blue-600 font-bold text-sm">View Reference Link</Text>
+                  </TouchableOpacity>
+                )}
+
+                {/* Attachments */}
+                {item.attachments && (
+                  <View className="mt-1">
+                    {(() => {
+                      try {
+                        const files = JSON.parse(item.attachments);
+                        if (!files || files.length === 0) return null;
+                        return files.map((file: string, index: number) => {
+                          const baseUrl = apiClient.defaults.baseURL?.replace('/api', '');
+                          const fileUrl = `${baseUrl}${file}`;
+                          return (
+                            <TouchableOpacity 
+                              key={index}
+                              className="flex-row items-center bg-slate-50 p-3 rounded-lg mb-2 border border-slate-200"
+                              onPress={() => Linking.openURL(fileUrl)}
+                            >
+                              <Icon name="download-outline" size={18} color="#475569" className="mr-2" />
+                              <Text className="text-slate-700 font-bold text-sm flex-1" numberOfLines={1}>
+                                Attachment {index + 1}
+                              </Text>
+                            </TouchableOpacity>
+                          );
+                        });
+                      } catch (e) {
+                        return null;
+                      }
+                    })()}
+                  </View>
+                )}
               </View>
             )}
             ListEmptyComponent={

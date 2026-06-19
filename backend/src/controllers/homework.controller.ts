@@ -4,21 +4,30 @@ import { AuthRequest } from '../middlewares/auth.middleware';
 
 export const createHomework = async (req: AuthRequest, res: Response): Promise<void> => {
   try {
-    const { grade, title, description, due_date } = req.body;
+    const { grade, subject, title, description, due_date, reference_link } = req.body;
     const teacherId = req.user?.id || null;
 
-    if (!grade || !title || !description || !due_date) {
+    if (!grade || !subject || !title || !description || !due_date) {
       res.status(400).json({ error: 'Missing required fields' });
       return;
     }
 
+    // Process uploaded files if any
+    const files = req.files as Express.Multer.File[];
+    let attachments = '[]';
+    
+    if (files && files.length > 0) {
+      const fileUrls = files.map(f => `/uploads/${f.filename}`);
+      attachments = JSON.stringify(fileUrls);
+    }
+
     const result = await pool.query(
-      `INSERT INTO homework (grade, title, description, due_date, created_by) 
-       VALUES ($1, $2, $3, $4, $5) RETURNING *`,
-      [grade, title, description, due_date, teacherId]
+      `INSERT INTO homework (grade, subject, title, description, due_date, reference_link, attachments, created_by) 
+       VALUES ($1, $2, $3, $4, $5, $6, $7, $8) RETURNING *`,
+      [grade, subject, title, description, due_date, reference_link || null, attachments, teacherId]
     );
 
-    res.status(201).json({ message: 'Homework assigned', data: result.rows[0] });
+    res.status(201).json({ message: 'Homework created successfully', data: result.rows[0] });
   } catch (error) {
     console.error('Create homework error:', error);
     res.status(500).json({ error: 'Internal server error' });

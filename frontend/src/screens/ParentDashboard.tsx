@@ -5,6 +5,7 @@ import { useDispatch } from 'react-redux';
 import { logout } from '../store/slices/authSlice';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import Icon from 'react-native-vector-icons/Ionicons';
+import Animated, { FadeInDown, FadeInUp } from 'react-native-reanimated';
 
 const { width } = Dimensions.get('window');
 
@@ -34,64 +35,80 @@ const ParentDashboard: React.FC<Props> = ({ navigation }) => {
   ];
 
   return (
-    <View className="flex-1 bg-white" style={{ paddingTop: Math.max(insets.top, 20) }}>
-      {/* Sleek Modern Header */}
-      <View className="px-6 py-4 flex-row justify-between items-center mb-2">
-        <View>
-          <Text className="text-textSecondary text-sm font-semibold tracking-widest uppercase">Welcome back</Text>
-          <Text className="text-textPrimary text-3xl font-black mt-1">Parent Panel</Text>
+    <View className="flex-1 bg-slate-50" style={{ paddingTop: Math.max(insets.top, 10) }}>
+      
+      {/* Decorative Background Blob */}
+      <View className="absolute w-[400px] h-[400px] bg-purple-100 rounded-full opacity-60 -top-20 -left-20" />
+
+      {/* Modern Profile Header */}
+      <Animated.View entering={FadeInDown.duration(800)} className="px-6 py-4 flex-row justify-between items-center mb-4 z-10">
+        <View className="flex-row items-center flex-1">
+          <View className="w-14 h-14 bg-white rounded-full items-center justify-center shadow-sm mr-4" style={{ elevation: 5, shadowColor: '#8B5CF6', shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.2 }}>
+            <Text className="text-2xl font-black text-purple-600">P</Text>
+          </View>
+          <View>
+            <Text className="text-gray-500 text-xs font-bold tracking-widest uppercase">Parent Portal</Text>
+            <Text className="text-slate-800 text-2xl font-black mt-1">My Wards</Text>
+          </View>
         </View>
         <TouchableOpacity 
           onPress={handleLogout} 
-          className="bg-gray-100 p-3 rounded-full shadow-sm"
-          style={{ shadowColor: '#000', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.05, shadowRadius: 3, elevation: 2 }}
+          className="bg-white p-3 rounded-full"
+          style={{ shadowColor: '#EF4444', shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.2, shadowRadius: 8, elevation: 4 }}
         >
-          <Icon name="log-out-outline" size={24} color="#EF4444" />
+          <Icon name="power" size={24} color="#EF4444" />
         </TouchableOpacity>
-      </View>
+      </Animated.View>
 
-      <ScrollView className="flex-1 px-5" showsVerticalScrollIndicator={false}>
-        {/* Child Selector / Summary Card */}
-        <View 
-          className="bg-primary w-full p-5 rounded-3xl flex-row items-center justify-between mb-8"
-          style={{ shadowColor: '#4F46E5', shadowOffset: { width: 0, height: 8 }, shadowOpacity: 0.3, shadowRadius: 10, elevation: 8 }}
-        >
-          <View className="flex-1">
-            <Text className="text-white/80 text-sm font-bold uppercase tracking-wider mb-1">Your Wards</Text>
-            <Text className="text-white text-xl font-bold">2 Children Enrolled</Text>
+      <ScrollView className="flex-1 px-6 z-10" showsVerticalScrollIndicator={false} contentContainerStyle={{ paddingBottom: 40 }}>
+        
+        {/* Child Summary Card */}
+        <Animated.View entering={FadeInUp.delay(200).duration(800)}>
+          <View 
+            className="bg-purple-600 w-full p-6 rounded-[30px] flex-row items-center justify-between mb-8"
+            style={{ shadowColor: '#7C3AED', shadowOffset: { width: 0, height: 10 }, shadowOpacity: 0.4, shadowRadius: 15, elevation: 10 }}
+          >
+            <View className="flex-1">
+              <View className="bg-white/20 self-start px-3 py-1 rounded-full mb-2">
+                <Text className="text-white text-xs font-bold uppercase tracking-wider">Overview</Text>
+              </View>
+              <Text className="text-white text-2xl font-black">2 Children Enrolled</Text>
+              <Text className="text-purple-100 text-sm font-semibold mt-1">Tap to view report cards</Text>
+            </View>
+            <TouchableOpacity className="bg-white p-4 rounded-full ml-4" style={{ shadowColor: '#000', shadowOpacity: 0.1, shadowRadius: 5, elevation: 5 }} onPress={() => navigation.navigate('Result')}>
+              <Icon name="stats-chart" size={28} color="#7C3AED" />
+            </TouchableOpacity>
           </View>
-          <View className="bg-white/20 p-3 rounded-2xl ml-4">
-            <Icon name="people" size={28} color="#fff" />
-          </View>
-        </View>
+        </Animated.View>
 
-        <Text className="text-textPrimary text-xl font-bold mb-4 ml-1">Academics & More</Text>
+        <Animated.Text entering={FadeInUp.delay(300).duration(800)} className="text-slate-800 text-xl font-black mb-4 ml-2 tracking-wide">
+          Academics & More
+        </Animated.Text>
 
         {/* Modern Grid */}
-        <View className="flex-row flex-wrap justify-between pb-10">
+        <View className="flex-row flex-wrap justify-between">
           {features.map((item, index) => (
-            <TouchableOpacity 
-              key={index} 
-              className="bg-white w-[48%] p-5 rounded-3xl items-center mb-4"
-              style={{ 
-                shadowColor: '#000', 
-                shadowOffset: { width: 0, height: 4 }, 
-                shadowOpacity: 0.06, 
-                shadowRadius: 12, 
-                elevation: 3,
-                borderWidth: 1,
-                borderColor: 'rgba(0,0,0,0.02)'
-              }}
-              onPress={() => navigation.navigate(item.screen)}
-              activeOpacity={0.7}
-            >
-              <View className={`${item.bg} p-4 rounded-2xl mb-3`}>
-                <Icon name={item.icon} size={30} color={item.color} />
-              </View>
-              <Text className="text-sm font-bold text-textPrimary text-center">
-                {item.title}
-              </Text>
-            </TouchableOpacity>
+            <Animated.View key={index} entering={FadeInUp.delay(400 + (index * 50)).duration(600)} className="w-[48%] mb-4">
+              <TouchableOpacity 
+                className="bg-white p-5 rounded-[28px] items-center"
+                style={{ 
+                  shadowColor: item.color, 
+                  shadowOffset: { width: 0, height: 8 }, 
+                  shadowOpacity: 0.1, 
+                  shadowRadius: 12, 
+                  elevation: 5,
+                }}
+                onPress={() => navigation.navigate(item.screen)}
+                activeOpacity={0.8}
+              >
+                <View className={`${item.bg} w-16 h-16 rounded-full items-center justify-center mb-3`}>
+                  <Icon name={item.icon} size={28} color={item.color} />
+                </View>
+                <Text className="text-sm font-bold text-slate-700 text-center">
+                  {item.title}
+                </Text>
+              </TouchableOpacity>
+            </Animated.View>
           ))}
         </View>
       </ScrollView>

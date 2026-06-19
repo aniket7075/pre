@@ -2,33 +2,90 @@ import React, { useState } from 'react';
 import { View, Text, TextInput, TouchableOpacity, Alert, ScrollView } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import Icon from 'react-native-vector-icons/Ionicons';
+import DocumentPicker, { DocumentPickerResponse } from 'react-native-document-picker';
 import apiClient from '../api/client';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
+import { useSelector } from 'react-redux';
+import { RootState } from '../store';
 
 type Props = { navigation: NativeStackNavigationProp<any, any>; };
 
 const CreateHomeworkScreen: React.FC<Props> = ({ navigation }) => {
   const insets = useSafeAreaInsets();
+  const { user } = useSelector((state: RootState) => state.auth);
+  
   const [loading, setLoading] = useState(false);
   const [grade, setGrade] = useState('1st Grade'); // Hardcoded for prototype
+  const [subject, setSubject] = useState(user?.department || '');
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
   const [dueDate, setDueDate] = useState('Tomorrow');
+  const [referenceLink, setReferenceLink] = useState('');
+  const [files, setFiles] = useState<DocumentPickerResponse[]>([]);
+
+  const pickFiles = async () => {
+    try {
+      const results = await DocumentPicker.pick({
+        allowMultiSelection: true,
+        type: [DocumentPicker.types.images, DocumentPicker.types.pdf, DocumentPicker.types.video],
+      });
+      setFiles([...files, ...results]);
+    } catch (err) {
+      if (DocumentPicker.isCancel(err)) {
+        // user canceled
+      } else {
+        Alert.alert('Error', 'Failed to pick files');
+      }
+    }
+  };
+
+  const removeFile = (index: number) => {
+    const newFiles = [...files];
+    newFiles.splice(index, 1);
+    setFiles(newFiles);
+  };
 
   const handleAssign = async () => {
-    if (!grade || !title || !description || !dueDate) {
-      Alert.alert('Validation Error', 'Please fill all fields');
+    if (!grade || !subject || !title || !description || !dueDate) {
+      Alert.alert('Validation Error', 'Please fill all required fields');
       return;
     }
 
     setLoading(true);
     try {
-      await apiClient.post('/homework', {
-        grade,
-        title,
-        description,
-        due_date: dueDate
-      });
+      if (files.length > 0) {
+        // Use FormData for file upload
+        const formData = new FormData();
+        formData.append('grade', grade);
+        formData.append('subject', subject);
+        formData.append('title', title);
+        formData.append('description', description);
+        formData.append('due_date', dueDate);
+        if (referenceLink) formData.append('reference_link', referenceLink);
+        
+        files.forEach((file, index) => {
+          formData.append('files', {
+            uri: file.uri,
+            type: file.type || 'application/octet-stream',
+            name: file.name || `file${index}`,
+          } as any);
+        });
+
+        await apiClient.post('/homework', formData, {
+          headers: { 'Content-Type': 'multipart/form-data' }
+        });
+      } else {
+        // Standard JSON request
+        await apiClient.post('/homework', {
+          grade,
+          subject,
+          title,
+          description,
+          due_date: dueDate,
+          reference_link: referenceLink || undefined
+        });
+      }
+      
       Alert.alert('Success', `Homework assigned to ${grade}!`);
       navigation.goBack();
     } catch (error: any) {
@@ -69,6 +126,18 @@ const CreateHomeworkScreen: React.FC<Props> = ({ navigation }) => {
           />
         </View>
 
+        <Text className="text-sm font-bold text-textSecondary uppercase tracking-wider mb-2 ml-1">Subject</Text>
+        <View className="flex-row items-center bg-gray-50 p-4 rounded-2xl mb-5 border border-gray-100">
+          <Icon name="library-outline" size={20} color="#64748B" className="mr-3" />
+          <TextInput
+            className="flex-1 text-base text-textPrimary font-semibold"
+            placeholder="e.g. Mathematics, English"
+            placeholderTextColor="#94A3B8"
+            value={subject}
+            onChangeText={setSubject}
+          />
+        </View>
+
         <Text className="text-sm font-bold text-textSecondary uppercase tracking-wider mb-2 ml-1">Homework Title</Text>
         <View className="flex-row items-center bg-gray-50 p-4 rounded-2xl mb-5 border border-gray-100">
           <Icon name="book-outline" size={20} color="#64748B" className="mr-3" />
@@ -96,7 +165,7 @@ const CreateHomeworkScreen: React.FC<Props> = ({ navigation }) => {
         </View>
 
         <Text className="text-sm font-bold text-textSecondary uppercase tracking-wider mb-2 ml-1">Due Date</Text>
-        <View className="flex-row items-center bg-gray-50 p-4 rounded-2xl mb-8 border border-gray-100">
+        <View className="flex-row items-center bg-gray-50 p-4 rounded-2xl mb-5 border border-gray-100">
           <Icon name="calendar-outline" size={20} color="#64748B" className="mr-3" />
           <TextInput
             className="flex-1 text-base text-textPrimary font-semibold"
@@ -105,6 +174,46 @@ const CreateHomeworkScreen: React.FC<Props> = ({ navigation }) => {
             onChangeText={setDueDate}
           />
         </View>
+
+        <Text className="text-sm font-bold text-textSecondary uppercase tracking-wider mb-2 ml-1">Reference Link (Optional)</Text>
+        <View className="flex-row items-center bg-gray-50 p-4 rounded-2xl mb-5 border border-gray-100">
+          <Icon name="link-outline" size={20} color="#64748B" className="mr-3" />
+          <TextInput
+            className="flex-1 text-base text-textPrimary font-semibold"
+            placeholder="e.g. https://youtube.com/watch?v=..."
+            placeholderTextColor="#94A3B8"
+            value={referenceLink}
+            onChangeText={setReferenceLink}
+            autoCapitalize="none"
+          />
+        </View>
+
+        <Text className="text-sm font-bold text-textSecondary uppercase tracking-wider mb-2 ml-1">Attachments</Text>
+        <TouchableOpacity 
+          onPress={pickFiles}
+          className="flex-row items-center justify-center bg-indigo-50 p-4 rounded-2xl mb-4 border border-indigo-100 border-dashed"
+        >
+          <Icon name="cloud-upload-outline" size={24} color="#4F46E5" className="mr-2" />
+          <Text className="text-primary font-bold text-base">Select Images, PDFs, or Videos</Text>
+        </TouchableOpacity>
+
+        {files.length > 0 && (
+          <View className="mb-6">
+            {files.map((file, index) => (
+              <View key={index} className="flex-row items-center justify-between bg-gray-50 p-3 rounded-xl mb-2 border border-gray-200">
+                <View className="flex-row items-center flex-1 pr-2">
+                  <Icon name="document-attach" size={20} color="#64748B" className="mr-2" />
+                  <Text className="text-sm text-textPrimary font-medium flex-1" numberOfLines={1}>{file.name}</Text>
+                </View>
+                <TouchableOpacity onPress={() => removeFile(index)} className="p-1">
+                  <Icon name="close-circle" size={20} color="#EF4444" />
+                </TouchableOpacity>
+              </View>
+            ))}
+          </View>
+        )}
+
+        <View className="h-4" />
 
         <TouchableOpacity 
           className={`p-5 rounded-2xl items-center flex-row justify-center mb-10 ${loading ? 'bg-gray-400' : 'bg-primary'}`}

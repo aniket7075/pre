@@ -24,6 +24,8 @@ const TeacherDashboard: React.FC<Props> = ({ navigation }) => {
     { title: 'Upload Notes', icon: '📚', screen: 'Notes' },
     { title: 'Parent Chats', icon: '💬', screen: 'Chat' },
     { title: 'Notices', icon: '📢', screen: 'Notice' },
+    { title: 'Progress', icon: '📈', screen: 'Progress' },
+    { title: 'Results', icon: '🏆', screen: 'Results' },
   ];
 
   return (

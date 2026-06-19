@@ -9,7 +9,7 @@ CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
 -- ==========================================
 -- ENUMS
 -- ==========================================
-CREATE TYPE user_role AS ENUM ('super_admin', 'school_admin', 'teacher', 'parent');
+CREATE TYPE user_role AS ENUM ('super_admin', 'school_admin', 'teacher', 'non_teaching_staff', 'parent');
 CREATE TYPE gender_type AS ENUM ('male', 'female', 'other');
 CREATE TYPE blood_group_type AS ENUM ('A+', 'A-', 'B+', 'B-', 'AB+', 'AB-', 'O+', 'O-');
 CREATE TYPE attendance_status AS ENUM ('present', 'absent', 'late', 'half_day', 'leave');
@@ -178,6 +178,37 @@ CREATE TABLE learning_content (
     content_url TEXT NOT NULL, -- Video or PDF URL
     thumbnail_url TEXT,
     created_by UUID REFERENCES users(id),
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE exams (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    school_id UUID REFERENCES schools(id) ON DELETE CASCADE,
+    section_id UUID REFERENCES sections(id) ON DELETE CASCADE,
+    name VARCHAR(255) NOT NULL,
+    exam_date DATE NOT NULL,
+    total_marks INTEGER NOT NULL,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE exam_results (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    exam_id UUID REFERENCES exams(id) ON DELETE CASCADE,
+    student_id UUID REFERENCES students(id) ON DELETE CASCADE,
+    marks_obtained DECIMAL(5, 2) NOT NULL,
+    grade VARCHAR(10),
+    remarks TEXT,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+    UNIQUE(exam_id, student_id)
+);
+
+CREATE TABLE student_notes (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    student_id UUID REFERENCES students(id) ON DELETE CASCADE,
+    teacher_id UUID REFERENCES users(id) ON DELETE SET NULL,
+    note_type VARCHAR(50) NOT NULL, -- 'behavior', 'academic', 'general'
+    content TEXT NOT NULL,
+    is_visible_to_parent BOOLEAN DEFAULT true,
     created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
 );
 

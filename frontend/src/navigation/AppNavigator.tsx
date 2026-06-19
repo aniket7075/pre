@@ -16,6 +16,8 @@ import TransportScreen from '../screens/TransportScreen';
 import AdminDashboard from '../screens/AdminDashboard';
 import TeacherDashboard from '../screens/TeacherDashboard';
 import ChatScreen from '../screens/ChatScreen';
+import ResultScreen from '../screens/ResultScreen';
+import ProgressDashboard from '../screens/ProgressDashboard';
 
 const Stack = createNativeStackNavigator();
 
@@ -50,6 +52,8 @@ const AppNavigator = () => {
             <Stack.Screen name="Fees" component={FeeScreen} />
             <Stack.Screen name="Transport" component={TransportScreen} />
             <Stack.Screen name="Chat" component={ChatScreen} />
+            <Stack.Screen name="Results" component={ResultScreen} />
+            <Stack.Screen name="Progress" component={ProgressDashboard} />
           </>
         ) : (
           // Auth Stack

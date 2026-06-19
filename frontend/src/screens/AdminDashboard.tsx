@@ -24,6 +24,7 @@ const AdminDashboard: React.FC<Props> = ({ navigation }) => {
     { title: 'School Notices', icon: '📢', screen: 'Notice' },
     { title: 'Transport', icon: '🚌', screen: 'Transport' },
     { title: 'Global Chat', icon: '💬', screen: 'Chat' },
+    { title: 'Progress', icon: '📈', screen: 'Progress' },
   ];
 
   return (

@@ -20,9 +20,11 @@ const ParentDashboard: React.FC<Props> = ({ navigation }) => {
   const features = [
     { title: 'Attendance', icon: '📅', screen: 'Attendance' },
     { title: 'Homework', icon: '📚', screen: 'Homework' },
-    { title: 'Notices', icon: '📢', screen: 'Notice' },
-    { title: 'Fees', icon: '💳', screen: 'Fees' },
-    { title: 'Transport', icon: '🚌', screen: 'Transport' },
+    { id: '4', title: 'Fees', icon: 'cash', screen: 'Fees', color: '#ff9933' },
+    { id: '5', title: 'Transport', icon: 'bus', screen: 'Transport', color: '#cc66ff' },
+    { id: '6', title: 'Chat', icon: 'chatbubbles', screen: 'Chat', color: '#66ccff' },
+    { id: '7', title: 'Progress', icon: 'bar-chart', screen: 'Progress', color: '#ff6699' },
+    { id: '8', title: 'Results', icon: 'school', screen: 'Results', color: '#4da6ff' },
   ];
 
   return (

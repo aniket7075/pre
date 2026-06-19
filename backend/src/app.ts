@@ -22,6 +22,9 @@ import noticeRoutes from './routes/notice.routes';
 import feeRoutes from './routes/fee.routes';
 import transportRoutes from './routes/transport.routes';
 import chatRoutes from './routes/chat.routes';
+import adminRoutes from './routes/admin.routes';
+import resultRoutes from './routes/result.routes';
+import progressRoutes from './routes/progress.routes';
 
 // Use routes
 app.use('/api/auth', authRoutes);
@@ -32,6 +35,9 @@ app.use('/api/notices', noticeRoutes);
 app.use('/api/fees', feeRoutes);
 app.use('/api/transport', transportRoutes);
 app.use('/api/chat', chatRoutes);
+app.use('/api/admin', adminRoutes);
+app.use('/api/results', resultRoutes);
+app.use('/api/progress', progressRoutes);
 
 // Error Handler Middleware
 app.use((err: any, req: express.Request, res: express.Response, next: express.NextFunction) => {

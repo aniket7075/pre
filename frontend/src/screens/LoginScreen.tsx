@@ -64,24 +64,20 @@ const LoginScreen: React.FC<Props> = ({ navigation }) => {
 
   const emailLabelStyle = useAnimatedStyle(() => ({
     transform: [
-      { translateY: emailFocusVal.value === 1 ? -12 : 18 },
+      { translateY: emailFocusVal.value === 1 ? -22 : 18 },
       { translateX: emailFocusVal.value === 1 ? 5 : 44 }
     ],
     fontSize: emailFocusVal.value === 1 ? 12 : 15,
     color: emailFocusVal.value === 1 ? '#6366F1' : '#94A3B8',
-    backgroundColor: emailFocusVal.value === 1 ? '#ffffff' : 'transparent',
-    paddingHorizontal: emailFocusVal.value === 1 ? 6 : 0,
   }));
 
   const passwordLabelStyle = useAnimatedStyle(() => ({
     transform: [
-      { translateY: passwordFocusVal.value === 1 ? -12 : 18 },
+      { translateY: passwordFocusVal.value === 1 ? -22 : 18 },
       { translateX: passwordFocusVal.value === 1 ? 5 : 44 }
     ],
     fontSize: passwordFocusVal.value === 1 ? 12 : 15,
     color: passwordFocusVal.value === 1 ? '#6366F1' : '#94A3B8',
-    backgroundColor: passwordFocusVal.value === 1 ? '#ffffff' : 'transparent',
-    paddingHorizontal: passwordFocusVal.value === 1 ? 6 : 0,
   }));
 
   // Shake animation for login failures
@@ -137,7 +133,7 @@ const LoginScreen: React.FC<Props> = ({ navigation }) => {
         <Animated.View style={[styles.logoContainer, floatingStyle]}>
           <Image source={logoImg} style={styles.logoImage as any} resizeMode="contain" />
         </Animated.View>
-        <Text style={styles.welcomeText}>Qodo</Text>
+        {/*<Text style={styles.welcomeText}>Qodo</Text>*/}
         <Text style={styles.subText}>Learn, Play & Grow!</Text>
       </Animated.View>
 
@@ -275,14 +271,16 @@ const styles = StyleSheet.create({
     marginTop: 4,
   },
   card: {
-    backgroundColor: '#ffffff',
+    backgroundColor: 'rgba(255, 255, 255, 0.45)',
     borderRadius: 32,
     padding: 26,
+    borderWidth: 1.5,
+    borderColor: 'rgba(255, 255, 255, 0.65)',
     shadowColor: '#6366F1',
     shadowOffset: { width: 0, height: 12 },
-    shadowOpacity: 0.12,
+    shadowOpacity: 0.08,
     shadowRadius: 20,
-    elevation: 12,
+    elevation: 8,
     zIndex: 10,
   },
   inputContainer: {
@@ -299,9 +297,9 @@ const styles = StyleSheet.create({
   inputWrapper: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#F8FAFC',
-    borderWidth: 2,
-    borderColor: '#E2E8F0',
+    backgroundColor: 'rgba(255, 255, 255, 0.55)',
+    borderWidth: 1.5,
+    borderColor: 'rgba(255, 255, 255, 0.75)',
     borderRadius: 18,
     paddingHorizontal: 15,
     height: 58,
@@ -309,10 +307,10 @@ const styles = StyleSheet.create({
   },
   inputWrapperFocused: {
     borderColor: '#6366F1',
-    backgroundColor: '#ffffff',
+    backgroundColor: 'rgba(255, 255, 255, 0.85)',
     shadowColor: '#6366F1',
     shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.08,
+    shadowOpacity: 0.05,
     shadowRadius: 8,
     elevation: 2,
   },

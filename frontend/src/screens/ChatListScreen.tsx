@@ -17,7 +17,6 @@ const ChatListScreen: React.FC<Props> = ({ navigation }) => {
   const insets = useSafeAreaInsets();
   const [rooms, setRooms] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
-  
   const [modalVisible, setModalVisible] = useState(false);
   const [newRoomName, setNewRoomName] = useState('');
   const [creating, setCreating] = useState(false);
@@ -48,8 +47,7 @@ const ChatListScreen: React.FC<Props> = ({ navigation }) => {
       const response = await apiClient.post('/chat/rooms', { name: newRoomName });
       setModalVisible(false);
       setNewRoomName('');
-      fetchRooms(); // refresh list
-      // Auto navigate to new room
+      fetchRooms();
       if (response.data.data?.id) {
         navigation.navigate('ChatRoom', { roomId: response.data.data.id, roomName: response.data.data.name });
       }
@@ -63,68 +61,51 @@ const ChatListScreen: React.FC<Props> = ({ navigation }) => {
   return (
     <View className="flex-1 bg-slate-50" style={{ paddingTop: Math.max(insets.top, 10) }}>
       <KidsBackground />
-      
-      {/* Premium Header */}
-      <Animated.View entering={FadeInDown.duration(600)} className="px-6 py-4 flex-row justify-between items-center mb-2 z-10">
-        <View className="flex-row items-center flex-1">
-          <TouchableOpacity 
-            onPress={() => navigation.goBack()} 
-            className="bg-white w-12 h-12 rounded-full items-center justify-center mr-4"
-            style={{ shadowColor: '#000', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.1, shadowRadius: 4, elevation: 3 }}
-          >
-            <Icon name="arrow-back" size={24} color="#334155" />
-          </TouchableOpacity>
-          <View>
-            <Text className="text-gray-500 text-xs font-bold tracking-widest uppercase">Communication</Text>
-            <Text className="text-slate-800 text-2xl font-black mt-1">Messages</Text>
-          </View>
-        </View>
-      </Animated.View>
-
-      {loading ? (
-        <View className="flex-1 justify-center items-center">
-          <ActivityIndicator size="large" color="#3B82F6" />
-        </View>
-      ) : (
-        <FlatList
-          data={rooms}
-          keyExtractor={(item) => item.id}
-          contentContainerStyle={{ padding: 20, paddingBottom: 100 }}
-          renderItem={({ item, index }) => (
-            <Animated.View entering={FadeInUp.delay(100 * index).duration(500)}>
-              <TouchableOpacity 
-                className="bg-white p-4 rounded-[24px] mb-4 flex-row items-center"
-                style={{ shadowColor: '#000', shadowOffset: { width: 0, height: 6 }, shadowOpacity: 0.04, shadowRadius: 10, elevation: 3, borderWidth: 1, borderColor: '#F8FAFC' }}
-                onPress={() => navigation.navigate('ChatRoom', { roomId: item.id, roomName: item.name })}
-                activeOpacity={0.7}
-              >
-                <View className="bg-blue-50 w-14 h-14 rounded-full items-center justify-center mr-4">
-                  <Icon name="chatbubbles" size={26} color="#3B82F6" />
-                </View>
-                <View className="flex-1">
-                  <Text className="font-bold text-lg text-slate-800 mb-0.5">{item.name}</Text>
-                  <Text className="text-slate-500 font-medium text-sm">Tap to view messages</Text>
-                </View>
-                <Icon name="chevron-forward" size={20} color="#CBD5E1" />
-              </TouchableOpacity>
-            </Animated.View>
-          )}
-          ListEmptyComponent={
-            <Animated.View entering={FadeInUp} className="items-center justify-center mt-20">
-              <View className="bg-slate-100 w-24 h-24 rounded-full items-center justify-center mb-4">
-                <Icon name="chatbubble-ellipses-outline" size={40} color="#94A3B8" />
+      <FlatList
+        data={rooms}
+        keyExtractor={(item) => item.id}
+        contentContainerStyle={{ padding: 20, paddingBottom: 100 }}
+        renderItem={({ item, index }) => (
+          <Animated.View entering={FadeInUp.delay(100 * index).duration(500)}>
+            <TouchableOpacity
+              className="bg-white p-4 rounded-[24px] mb-4 flex-row items-center"
+              style={{
+                shadowColor: '#000',
+                shadowOffset: { width: 0, height: 6 },
+                shadowOpacity: 0.04,
+                shadowRadius: 10,
+                elevation: 3,
+                borderWidth: 1,
+                borderColor: '#F8FAFC',
+              }}
+              onPress={() => navigation.navigate('ChatRoom', { roomId: item.id, roomName: item.name })}
+              activeOpacity={0.7}
+            >
+              <View className="bg-blue-50 w-14 h-14 rounded-full items-center justify-center mr-4">
+                <Icon name="chatbubbles" size={26} color="#3B82F6" />
               </View>
-              <Text className="text-slate-400 font-bold text-lg">No chats available</Text>
-              <Text className="text-slate-500 text-sm mt-2">Tap the + button to start a new chat</Text>
-            </Animated.View>
-          }
-        />
-      )}
+              <View className="flex-1">
+                <Text className="font-bold text-lg text-slate-800 mb-0.5">{item.name}</Text>
+                <Text className="text-slate-500 font-medium text-sm">Tap to view messages</Text>
+              </View>
+              <Icon name="chevron-forward" size={20} color="#CBD5E1" />
+            </TouchableOpacity>
+          </Animated.View>
+        )}
+        ListEmptyComponent={
+          <Animated.View entering={FadeInUp} className="items-center justify-center mt-20">
+            <View className="bg-slate-100 w-24 h-24 rounded-full items-center justify-center mb-4">
+              <Icon name="chatbubble-ellipses-outline" size={40} color="#94A3B8" />
+            </View>
+            <Text className="text-slate-400 font-bold text-lg">No chats available</Text>
+            <Text className="text-slate-500 text-sm mt-2">Tap the + button to start a new chat</Text>
+          </Animated.View>
+        }
+      />
 
-      {/* Floating Add Button for Teachers/Admins */}
       {(user?.role === 'teacher' || user?.role === 'school_admin' || user?.role === 'super_admin') && (
         <Animated.View entering={FadeInUp.delay(300).duration(500)} className="absolute bottom-6 right-6">
-          <TouchableOpacity 
+          <TouchableOpacity
             onPress={() => setModalVisible(true)}
             className="bg-blue-600 w-16 h-16 rounded-full items-center justify-center"
             style={{ shadowColor: '#2563EB', shadowOffset: { width: 0, height: 6 }, shadowOpacity: 0.4, shadowRadius: 8, elevation: 8 }}
@@ -134,7 +115,6 @@ const ChatListScreen: React.FC<Props> = ({ navigation }) => {
         </Animated.View>
       )}
 
-      {/* Create Chat Modal */}
       <Modal visible={modalVisible} animationType="slide" transparent={true}>
         <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : 'height'} className="flex-1 justify-end bg-black/50">
           <View className="bg-white rounded-t-3xl p-6" style={{ paddingBottom: Math.max(insets.bottom, 20) }}>
@@ -147,7 +127,7 @@ const ChatListScreen: React.FC<Props> = ({ navigation }) => {
 
             <View className="mb-8">
               <Text className="text-slate-600 font-bold mb-2 ml-1">Chat Name / Topic *</Text>
-              <TextInput 
+              <TextInput
                 className="bg-slate-50 border border-slate-200 rounded-2xl px-4 py-3.5 text-slate-800 font-medium"
                 placeholder="e.g. 1st Grade Parents, Annual Day Planning"
                 value={newRoomName}
@@ -155,7 +135,7 @@ const ChatListScreen: React.FC<Props> = ({ navigation }) => {
               />
             </View>
 
-            <TouchableOpacity 
+            <TouchableOpacity
               onPress={handleCreateChat}
               disabled={creating}
               className="bg-blue-600 py-4 rounded-2xl items-center shadow-sm flex-row justify-center"

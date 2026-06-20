@@ -6,6 +6,7 @@ import { useFocusEffect } from '@react-navigation/native';
 import Icon from 'react-native-vector-icons/Ionicons';
 import Animated, { FadeInDown, FadeInUp, Layout } from 'react-native-reanimated';
 import apiClient from '../api/client';
+import KidsBackground from '../components/KidsBackground';
 
 type Props = {
   navigation: NativeStackNavigationProp<any, any>;
@@ -192,6 +193,7 @@ const StaffScreen: React.FC<Props> = ({ navigation, route }) => {
 
   return (
     <View className="flex-1 bg-slate-50" style={{ paddingTop: Math.max(insets.top, 10) }}>
+      <KidsBackground />
       {/* Header */}
       <Animated.View entering={FadeInDown.duration(600)} className="px-6 py-4 flex-row justify-between items-center z-10">
         <View className="flex-row items-center">

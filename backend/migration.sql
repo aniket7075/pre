@@ -27,7 +27,8 @@ CREATE TABLE IF NOT EXISTS parents (
     address TEXT,
     created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
 );
-CREATE INDEX IF NOT EXISTS idx_parents_email ON parents(email);
+DROP INDEX IF EXISTS idx_parents_email;
+CREATE UNIQUE INDEX idx_parents_email ON parents(email);
 
 -- 3. Add missing columns to students table (if not present)
 ALTER TABLE students ADD COLUMN IF NOT EXISTS grade VARCHAR(50);

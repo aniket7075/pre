@@ -5,23 +5,30 @@ import { AuthRequest } from '../middlewares/auth.middleware';
 export const getCertificates = async (req: AuthRequest, res: Response): Promise<void> => {
   try {
     const role = req.user?.role;
-    const userId = req.user?.id;
+    const email = req.user?.email;
 
     let query = '';
     let queryParams: any[] = [];
 
     if (role === 'parent') {
+      let parentId = null;
+      if (email) {
+        const parentRes = await pool.query('SELECT id FROM parents WHERE email = $1', [email]);
+        if (parentRes.rows.length > 0) {
+          parentId = parentRes.rows[0].id;
+        }
+      }
       query = `
-        SELECT c.*, s.full_name as student_name 
+        SELECT c.*, s.first_name || ' ' || s.last_name as student_name 
         FROM certificates c
         JOIN students s ON c.student_id = s.id
         WHERE s.parent_id = $1
         ORDER BY c.created_at DESC
       `;
-      queryParams = [userId];
+      queryParams = [parentId];
     } else {
       query = `
-        SELECT c.*, s.full_name as student_name 
+        SELECT c.*, s.first_name || ' ' || s.last_name as student_name 
         FROM certificates c
         JOIN students s ON c.student_id = s.id
         ORDER BY c.created_at DESC

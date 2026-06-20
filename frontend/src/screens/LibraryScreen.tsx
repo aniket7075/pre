@@ -12,7 +12,7 @@ type Props = { navigation: NativeStackNavigationProp<any, any>; };
 
 const LibraryScreen: React.FC<Props> = ({ navigation }) => {
   const insets = useSafeAreaInsets();
-  const { user } = useSelector((state: RootState) => state.auth);
+  const { user, activeChild } = useSelector((state: RootState) => state.auth);
   const isParent = user?.role === 'parent';
 
   const [activeTab, setActiveTab] = useState<'catalog' | 'issued'>('catalog');
@@ -29,19 +29,23 @@ const LibraryScreen: React.FC<Props> = ({ navigation }) => {
   const fetchBooks = async () => {
     try {
       const response = await apiClient.get('/library/books');
-      setBooks(response.data.data);
+      setBooks(response.data.data || []);
     } catch (error) {
-      console.error(error);
+      console.error('Fetch books error:', error);
     }
   };
 
   const fetchIssuedBooks = async () => {
     try {
-      // Mock student ID for demo
-      const response = await apiClient.get('/library/issued/dummy-student-id');
-      setIssuedBooks(response.data.data);
+      const studentId = isParent ? activeChild?.id : 'dummy-student-id';
+      if (isParent && !studentId) {
+        setIssuedBooks([]);
+        return;
+      }
+      const response = await apiClient.get(`/library/issued/${studentId}`);
+      setIssuedBooks(response.data.data || []);
     } catch (error) {
-      console.error(error);
+      console.error('Fetch issued books error:', error);
     }
   };
 
@@ -53,7 +57,7 @@ const LibraryScreen: React.FC<Props> = ({ navigation }) => {
 
   useEffect(() => {
     loadData();
-  }, []);
+  }, [activeChild?.id]);
 
   const handleAddBook = async () => {
     if (!title || !author) {
@@ -74,6 +78,7 @@ const LibraryScreen: React.FC<Props> = ({ navigation }) => {
 
   return (
     <View className="flex-1 bg-white" style={{ paddingTop: Math.max(insets.top, 10) }}>
+      <KidsBackground />
       <View className="flex-row items-center justify-between px-6 py-4 mb-2">
         <View className="flex-row items-center">
           <TouchableOpacity onPress={() => navigation.goBack()} className="bg-gray-50 p-3 rounded-full mr-4">
@@ -154,7 +159,6 @@ const LibraryScreen: React.FC<Props> = ({ navigation }) => {
             const isOverdue = new Date(item.due_date) < new Date() && item.status !== 'returned';
             return (
               <View className="bg-white p-4 rounded-2xl shadow-sm mb-4 border border-gray-100">
-      <KidsBackground />
                 <View className="flex-row justify-between items-start mb-2">
                   <Text className="font-bold text-lg flex-1 mr-2">{item.title}</Text>
                   <View className={`px-2 py-1 rounded-md ${item.status === 'returned' ? 'bg-green-100' : isOverdue ? 'bg-red-100' : 'bg-blue-100'}`}>

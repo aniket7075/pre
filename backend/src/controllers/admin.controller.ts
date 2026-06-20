@@ -197,7 +197,8 @@ export const addFamily = async (req: AuthRequest, res: Response): Promise<void> 
          RETURNING id, first_name, last_name, admission_number`,
         [
           parentId, firstName, lastName, admissionNum, child.grade || null,
-          child.dateOfBirth || null, child.gender || 'male',
+          child.dateOfBirth || child.date_of_birth || null,   // nullable – no crash if omitted
+          child.gender || 'male',
           child.bloodGroup || null, child.profileImageUrl || null
         ]
       );

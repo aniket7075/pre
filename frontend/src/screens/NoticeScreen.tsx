@@ -4,6 +4,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import Icon from 'react-native-vector-icons/Ionicons';
 import Animated, { FadeInDown, FadeInUp, Layout } from 'react-native-reanimated';
 import apiClient from '../api/client';
+import KidsBackground from '../components/KidsBackground';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { useSelector } from 'react-redux';
 import { RootState } from '../store';
@@ -78,6 +79,7 @@ const NoticeScreen: React.FC<Props> = ({ navigation }) => {
 
   return (
     <View className="flex-1 bg-slate-50" style={{ paddingTop: Math.max(insets.top, 10) }}>
+      <KidsBackground />
       {/* Header */}
       <Animated.View entering={FadeInDown.duration(600)} className="px-6 py-4 flex-row justify-between items-center z-10">
         <View className="flex-row items-center">

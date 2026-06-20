@@ -1,12 +1,3 @@
-# Implementation Plan: Complete School Management Features
-
-Based on your request to add comprehensive features for Admin, Staff (Teaching & Non-Teaching), and Parents, here is the proposed implementation plan to build a complete school management ecosystem.
-
-## Goal Description
-Expand the current system to support a robust academic environment where:
-- **Admins** have full CRUD (Create, Read, Update, Delete) access over all entities.
-- **Staff** is categorized into `teacher` and `non_teaching_staff`.
-- **Teachers** can manage class-wise attendance, daily homework, notes/remarks, and exam results.
 - **Parents** get a comprehensive view of their child's progress, including attendance, homework, and academic results.
 
 ---

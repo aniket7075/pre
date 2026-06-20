@@ -75,7 +75,15 @@ export const createRazorpayOrder = async (req: AuthRequest, res: Response): Prom
 export const verifyPayment = async (req: AuthRequest, res: Response): Promise<void> => {
   try {
     const { fee_id, amount_paid } = req.body;
-    const parentId = req.user?.id || null;
+    const parentEmail = req.user?.email;
+    let parentId = null;
+
+    if (parentEmail) {
+      const parentRes = await pool.query('SELECT id FROM parents WHERE email = $1', [parentEmail]);
+      if (parentRes.rows.length > 0) {
+        parentId = parentRes.rows[0].id;
+      }
+    }
 
     // Record payment (mocking razorpay IDs)
     const result = await pool.query(

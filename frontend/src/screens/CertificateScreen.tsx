@@ -12,7 +12,7 @@ type Props = { navigation: NativeStackNavigationProp<any, any>; };
 
 const CertificateScreen: React.FC<Props> = ({ navigation }) => {
   const insets = useSafeAreaInsets();
-  const { user } = useSelector((state: RootState) => state.auth);
+  const { user, activeChild } = useSelector((state: RootState) => state.auth);
   const isParent = user?.role === 'parent';
   
   const [certs, setCerts] = useState<any[]>([]);
@@ -26,7 +26,7 @@ const CertificateScreen: React.FC<Props> = ({ navigation }) => {
   const fetchCerts = async () => {
     try {
       const response = await apiClient.get('/certificates');
-      setCerts(response.data.data);
+      setCerts(response.data.data || []);
     } catch (error) {
       console.error(error);
     } finally {
@@ -36,16 +36,20 @@ const CertificateScreen: React.FC<Props> = ({ navigation }) => {
 
   useEffect(() => {
     fetchCerts();
-  }, []);
+  }, [activeChild?.id]);
 
   const handleApply = async () => {
     if (!reason) {
       Alert.alert('Error', 'Please provide a reason');
       return;
     }
+    if (isParent && !activeChild?.id) {
+      Alert.alert('Error', 'Please select a child first');
+      return;
+    }
     try {
       await apiClient.post('/certificates', {
-        student_id: 'dummy-student-id', // Mock
+        student_id: isParent ? activeChild?.id : null,
         type: certType,
         reason
       });
@@ -127,7 +131,7 @@ const CertificateScreen: React.FC<Props> = ({ navigation }) => {
                 </View>
               </View>
               <Text className="text-gray-800 mb-1">{item.reason}</Text>
-              <Text className="text-xs text-gray-400 mb-3">Applied on: {item.created_at.substring(0, 10)}</Text>
+              <Text className="text-xs text-gray-400 mb-3">Applied on: {item.created_at ? item.created_at.substring(0, 10) : ''}</Text>
               
               {!isParent && item.status === 'pending' && (
                 <View className="flex-row justify-end space-x-3 mt-2 border-t border-gray-100 pt-3">

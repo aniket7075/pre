@@ -21,7 +21,7 @@ interface RouteData {
 }
 
 const TransportScreen: React.FC<Props> = ({ navigation }) => {
-  const { user } = useSelector((state: RootState) => state.auth);
+  const { user, activeChild } = useSelector((state: RootState) => state.auth);
   const isAdmin = user?.role === 'super_admin' || user?.role === 'school_admin';
 
   const [loading, setLoading] = useState(true);
@@ -44,7 +44,7 @@ const TransportScreen: React.FC<Props> = ({ navigation }) => {
 
   useEffect(() => {
     fetchData();
-  }, []);
+  }, [activeChild?.id]);
 
   const fetchData = async () => {
     setLoading(true);
@@ -53,8 +53,11 @@ const TransportScreen: React.FC<Props> = ({ navigation }) => {
         const response = await apiClient.get('/transport/routes');
         setRoutes(response.data.data);
       } else {
-        // Fetch student specific transport (mock child id for demo or fetch activeChild id)
-        const response = await apiClient.get('/transport/student/dummy_student_id');
+        if (!activeChild?.id) {
+          setLoading(false);
+          return;
+        }
+        const response = await apiClient.get(`/transport/student/${activeChild.id}`);
         setStudentTransport(response.data.data);
       }
     } catch (error) {

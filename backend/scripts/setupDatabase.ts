@@ -19,9 +19,11 @@ async function setupDatabase() {
     await client.query(`
       CREATE TABLE IF NOT EXISTS parents (
         id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-        full_name VARCHAR(255) NOT NULL,
+        name VARCHAR(255) NOT NULL,
         contact_number VARCHAR(50) NOT NULL,
-        email VARCHAR(255),
+        alternative_mobile VARCHAR(20),
+        address TEXT,
+        email VARCHAR(255) UNIQUE,
         created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
       );
     `);

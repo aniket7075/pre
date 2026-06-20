@@ -5,6 +5,8 @@ import Icon from 'react-native-vector-icons/Ionicons';
 import apiClient from '../api/client';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import KidsBackground from '../components/KidsBackground';
+import { useSelector } from 'react-redux';
+import { RootState } from '../store';
 
 type Props = { navigation: NativeStackNavigationProp<any, any>; };
 
@@ -12,14 +14,19 @@ const ResultScreen: React.FC<Props> = ({ navigation }) => {
   const insets = useSafeAreaInsets();
   const [marks, setMarks] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+  const { activeChild } = useSelector((state: RootState) => state.auth);
 
   const fetchResults = async () => {
+    if (!activeChild?.id) {
+      setLoading(false);
+      return;
+    }
     try {
-      // Mock student ID for demo
-      const response = await apiClient.get('/exams/marks/dummy-student-id');
-      setMarks(response.data.data);
+      setLoading(true);
+      const response = await apiClient.get(`/exams/marks/${activeChild.id}`);
+      setMarks(response.data.data || []);
     } catch (error) {
-      console.error(error);
+      console.error('Fetch results error:', error);
     } finally {
       setLoading(false);
     }
@@ -27,7 +34,7 @@ const ResultScreen: React.FC<Props> = ({ navigation }) => {
 
   useEffect(() => {
     fetchResults();
-  }, []);
+  }, [activeChild?.id]);
 
   // Group marks by term
   const term1Marks = marks.filter(m => m.term === 'Term 1');

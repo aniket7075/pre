@@ -1,5 +1,5 @@
 import React, { useEffect } from 'react';
-import { View, Text, StyleSheet, Dimensions } from 'react-native';
+import { View, Text, StyleSheet, Dimensions, Image } from 'react-native';
 import Animated, { 
   useSharedValue, 
   useAnimatedStyle, 
@@ -15,6 +15,7 @@ type Props = {
 };
 
 const { width } = Dimensions.get('window');
+const logoImg = require('../../qidoo.png');
 
 const SplashScreen: React.FC<Props> = ({ navigation }) => {
   const logoScale = useSharedValue(0);
@@ -69,12 +70,11 @@ const SplashScreen: React.FC<Props> = ({ navigation }) => {
       <View style={[styles.circle, styles.circle3]} />
 
       <Animated.View style={[styles.logoContainer, logoStyle]}>
-        {/* Placeholder for an actual playful logo/icon */}
-        <Text style={styles.logoText}>🎨</Text> 
+        <Image source={logoImg} style={styles.logoImage} resizeMode="contain" />
       </Animated.View>
 
       <Animated.View style={textStyle}>
-        <Text style={styles.title}>Kiddy Connect</Text>
+        <Text style={styles.title}>Qidoo</Text>
         <Text style={styles.subtitle}>Learn, Play, Grow!</Text>
       </Animated.View>
     </View>
@@ -84,7 +84,7 @@ const SplashScreen: React.FC<Props> = ({ navigation }) => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#f0f8ff', // Background primary
+    backgroundColor: '#F0F9FF', // Background primary matching login
     justifyContent: 'center',
     alignItems: 'center',
     overflow: 'hidden',
@@ -97,57 +97,57 @@ const styles = StyleSheet.create({
   circle1: {
     width: width * 0.8,
     height: width * 0.8,
-    backgroundColor: '#ffcc00', // Secondary
+    backgroundColor: '#FEF08A', // Soft Yellow
     top: -width * 0.2,
     right: -width * 0.2,
   },
   circle2: {
     width: width * 0.6,
     height: width * 0.6,
-    backgroundColor: '#ff6699', // Accent
+    backgroundColor: '#FBCFE8', // Soft Pink
     bottom: -width * 0.1,
     left: -width * 0.2,
   },
   circle3: {
     width: width * 0.4,
     height: width * 0.4,
-    backgroundColor: '#33cc33', // Success
+    backgroundColor: '#A7F3D0', // Soft Green
     top: width * 0.4,
     left: width * 0.8,
   },
   logoContainer: {
-    width: 120,
-    height: 120,
-    backgroundColor: '#4da6ff', // Primary
+    width: 130,
+    height: 130,
+    backgroundColor: '#ffffff',
     borderRadius: 40,
     justifyContent: 'center',
     alignItems: 'center',
-    elevation: 8,
-    shadowColor: '#4da6ff',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.5,
-    shadowRadius: 10,
-    marginBottom: 30,
+    elevation: 10,
+    shadowColor: '#6366F1',
+    shadowOffset: { width: 0, height: 8 },
+    shadowOpacity: 0.15,
+    shadowRadius: 12,
+    marginBottom: 25,
+    borderWidth: 3,
+    borderColor: '#ffffff',
   },
-  logoText: {
-    fontSize: 60,
+  logoImage: {
+    width: 100,
+    height: 100,
   },
   title: {
-    fontSize: 42,
-    fontWeight: '900',
-    color: '#ff6699', // Vibrant pink
+    fontSize: 44,
+    fontWeight: '950',
+    color: '#1E3A8A', // Vibrant dark blue
     textAlign: 'center',
-    textShadowColor: 'rgba(0, 0, 0, 0.1)',
-    textShadowOffset: { width: 1, height: 1 },
-    textShadowRadius: 2,
-    letterSpacing: 1,
+    letterSpacing: 0.5,
   },
   subtitle: {
-    fontSize: 20,
-    fontWeight: '700',
-    color: '#4da6ff', // Playful blue
+    fontSize: 18,
+    fontWeight: '800',
+    color: '#6366F1', // Playful blue/indigo
     textAlign: 'center',
-    marginTop: 10,
+    marginTop: 8,
     letterSpacing: 0.5,
   }
 });

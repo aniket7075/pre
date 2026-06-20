@@ -6,6 +6,7 @@ import Icon from 'react-native-vector-icons/Ionicons';
 import apiClient from '../api/client';
 import KidsBackground from '../components/KidsBackground';
 import DocumentPicker, { types } from 'react-native-document-picker';
+import DatePickerModal from '../components/DatePickerModal';
 
 type Props = {
   navigation: NativeStackNavigationProp<any, any>;
@@ -26,6 +27,9 @@ const AddParentStudentScreen: React.FC<Props> = ({ navigation }) => {
   const [children, setChildren] = useState<any[]>([
     { id: 1, name: '', admissionNumber: '', grade: '', age: '', gender: 'male', dateOfBirth: '', bloodGroup: '', emergencyContactName: '', emergencyContactPhone: '', profileImage: null }
   ]);
+
+  const [datePickerVisible, setDatePickerVisible] = useState(false);
+  const [activeChildDatePickerId, setActiveChildDatePickerId] = useState<number | null>(null);
 
   const addChild = () => {
     if (children.length >= 3) {
@@ -288,15 +292,19 @@ const AddParentStudentScreen: React.FC<Props> = ({ navigation }) => {
 
               {/* Date of Birth */}
               <View className="mb-4">
-                <Text className="text-xs text-slate-500 mb-1 font-bold uppercase tracking-wider ml-1">Date of Birth (YYYY-MM-DD)</Text>
-                <TextInput 
-                  className="bg-slate-50 border border-slate-100 rounded-2xl p-4 text-slate-800 font-medium"
-                  placeholder="e.g. 2018-05-15"
-                  value={child.dateOfBirth}
-                  onChangeText={(val) => updateChild(child.id, 'dateOfBirth', val)}
-                  placeholderTextColor="#94A3B8"
-                  keyboardType="numbers-and-punctuation"
-                />
+                <Text className="text-xs text-slate-500 mb-1 font-bold uppercase tracking-wider ml-1">Date of Birth</Text>
+                <TouchableOpacity 
+                  onPress={() => {
+                    setActiveChildDatePickerId(child.id);
+                    setDatePickerVisible(true);
+                  }}
+                  className="bg-slate-50 border border-slate-100 rounded-2xl p-4 flex-row justify-between items-center"
+                >
+                  <Text className={`font-medium ${child.dateOfBirth ? 'text-slate-800' : 'text-slate-400'}`}>
+                    {child.dateOfBirth || 'Select Date of Birth'}
+                  </Text>
+                  <Icon name="calendar-outline" size={20} color="#0D9488" />
+                </TouchableOpacity>
               </View>
 
               {/* Gender */}
@@ -388,6 +396,18 @@ const AddParentStudentScreen: React.FC<Props> = ({ navigation }) => {
           
         </ScrollView>
       </KeyboardAvoidingView>
+
+      <DatePickerModal
+        visible={datePickerVisible}
+        onClose={() => setDatePickerVisible(false)}
+        initialValue={children.find(c => c.id === activeChildDatePickerId)?.dateOfBirth}
+        onSelect={(dateStr) => {
+          if (activeChildDatePickerId !== null) {
+            updateChild(activeChildDatePickerId, 'dateOfBirth', dateStr);
+          }
+        }}
+        title="Select Date of Birth"
+      />
     </View>
   );
 };

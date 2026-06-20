@@ -11,6 +11,7 @@ import { RootState } from '../store';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import Animated, { FadeInDown, FadeInUp } from 'react-native-reanimated';
 import KidsBackground from '../components/KidsBackground';
+import DatePickerModal from '../components/DatePickerModal';
 
 type Props = { navigation: NativeStackNavigationProp<any, any> };
 
@@ -34,6 +35,9 @@ const LeaveScreen: React.FC<Props> = ({ navigation }) => {
   const [startDate, setStartDate] = useState('');
   const [endDate, setEndDate] = useState('');
   const [reason, setReason] = useState('');
+
+  const [datePickerVisible, setDatePickerVisible] = useState(false);
+  const [dateFieldTarget, setDateFieldTarget] = useState<'start' | 'end' | null>(null);
 
   const fetchLeaves = async () => {
     try {
@@ -165,21 +169,32 @@ const LeaveScreen: React.FC<Props> = ({ navigation }) => {
           )}
 
           <Text style={{ color: '#64748B', fontWeight: '700', fontSize: 12, marginBottom: 6 }}>START DATE</Text>
-          <TextInput
-            style={{ backgroundColor: '#F8FAFC', padding: 14, borderRadius: 14, marginBottom: 12, fontWeight: '600', color: '#1E293B', borderWidth: 1, borderColor: '#E2E8F0' }}
-            value={startDate}
-            onChangeText={setStartDate}
-            placeholder="YYYY-MM-DD (e.g. 2024-06-15)"
-            placeholderTextColor="#CBD5E1"
-          />
+          <TouchableOpacity
+            onPress={() => {
+              setDateFieldTarget('start');
+              setDatePickerVisible(true);
+            }}
+            style={{ backgroundColor: '#F8FAFC', padding: 14, borderRadius: 14, marginBottom: 12, borderWidth: 1, borderColor: '#E2E8F0', flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}
+          >
+            <Text style={{ fontSize: 14, fontWeight: '600', color: startDate ? '#1E293B' : '#CBD5E1' }}>
+              {startDate || 'Select Start Date'}
+            </Text>
+            <Icon name="calendar-outline" size={20} color="#7C3AED" />
+          </TouchableOpacity>
+          
           <Text style={{ color: '#64748B', fontWeight: '700', fontSize: 12, marginBottom: 6 }}>END DATE</Text>
-          <TextInput
-            style={{ backgroundColor: '#F8FAFC', padding: 14, borderRadius: 14, marginBottom: 12, fontWeight: '600', color: '#1E293B', borderWidth: 1, borderColor: '#E2E8F0' }}
-            value={endDate}
-            onChangeText={setEndDate}
-            placeholder="YYYY-MM-DD (e.g. 2024-06-16)"
-            placeholderTextColor="#CBD5E1"
-          />
+          <TouchableOpacity
+            onPress={() => {
+              setDateFieldTarget('end');
+              setDatePickerVisible(true);
+            }}
+            style={{ backgroundColor: '#F8FAFC', padding: 14, borderRadius: 14, marginBottom: 12, borderWidth: 1, borderColor: '#E2E8F0', flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}
+          >
+            <Text style={{ fontSize: 14, fontWeight: '600', color: endDate ? '#1E293B' : '#CBD5E1' }}>
+              {endDate || 'Select End Date'}
+            </Text>
+            <Icon name="calendar-outline" size={20} color="#7C3AED" />
+          </TouchableOpacity>
           <Text style={{ color: '#64748B', fontWeight: '700', fontSize: 12, marginBottom: 6 }}>REASON</Text>
           <TextInput
             style={{ backgroundColor: '#F8FAFC', padding: 14, borderRadius: 14, marginBottom: 16, fontWeight: '600', color: '#1E293B', height: 90, textAlignVertical: 'top', borderWidth: 1, borderColor: '#E2E8F0' }}
@@ -295,6 +310,22 @@ const LeaveScreen: React.FC<Props> = ({ navigation }) => {
           }
         />
       )}
+      <DatePickerModal
+        visible={datePickerVisible}
+        onClose={() => {
+          setDatePickerVisible(false);
+          setDateFieldTarget(null);
+        }}
+        initialValue={dateFieldTarget === 'start' ? startDate : endDate}
+        onSelect={(dateStr) => {
+          if (dateFieldTarget === 'start') {
+            setStartDate(dateStr);
+          } else if (dateFieldTarget === 'end') {
+            setEndDate(dateStr);
+          }
+        }}
+        title={dateFieldTarget === 'start' ? 'Select Start Date' : 'Select End Date'}
+      />
     </View>
   );
 };

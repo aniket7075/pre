@@ -5,6 +5,7 @@ import Icon from 'react-native-vector-icons/Ionicons';
 import apiClient, { BASE_URL } from '../api/client';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import KidsBackground from '../components/KidsBackground';
+import DatePickerModal from '../components/DatePickerModal';
 
 type Props = { navigation: NativeStackNavigationProp<any, any>; };
 
@@ -32,6 +33,7 @@ const AssignFeeScreen: React.FC<Props> = ({ navigation }) => {
   const [students, setStudents] = useState<Student[]>([]);
   const [selectedStudent, setSelectedStudent] = useState<Student | null>(null);
   const [modalVisible, setModalVisible] = useState(false);
+  const [datePickerVisible, setDatePickerVisible] = useState(false);
 
   useEffect(() => {
     fetchStudents();
@@ -191,16 +193,19 @@ const AssignFeeScreen: React.FC<Props> = ({ navigation }) => {
           <Icon name="chevron-down" size={20} color="#94A3B8" />
         </TouchableOpacity>
 
-        <Text className="text-sm font-bold text-textSecondary uppercase tracking-wider mb-2 ml-1">Due Date (YYYY-MM-DD)</Text>
-        <View className="flex-row items-center bg-gray-50 p-4 rounded-2xl mb-8 border border-gray-100">
-          <Icon name="calendar-outline" size={20} color="#64748B" className="mr-3" />
-          <TextInput
-            className="flex-1 text-base text-textPrimary font-semibold"
-            placeholder="2023-12-01"
-            value={dueDate}
-            onChangeText={setDueDate}
-          />
-        </View>
+        <Text className="text-sm font-bold text-textSecondary uppercase tracking-wider mb-2 ml-1">Due Date</Text>
+        <TouchableOpacity 
+          onPress={() => setDatePickerVisible(true)}
+          className="flex-row items-center justify-between bg-gray-50 p-4 rounded-2xl mb-8 border border-gray-100"
+        >
+          <View className="flex-row items-center">
+            <Icon name="calendar-outline" size={20} color="#64748B" className="mr-3" />
+            <Text className={`text-base font-semibold ${dueDate ? 'text-textPrimary' : 'text-gray-400'}`}>
+              {dueDate || 'Select Due Date'}
+            </Text>
+          </View>
+          <Icon name="chevron-down" size={20} color="#94A3B8" />
+        </TouchableOpacity>
 
         <TouchableOpacity 
           className={`p-5 rounded-2xl items-center flex-row justify-center mb-10 ${loading ? 'bg-gray-400' : 'bg-primary'}`}
@@ -214,6 +219,14 @@ const AssignFeeScreen: React.FC<Props> = ({ navigation }) => {
       </ScrollView>
 
       {renderStudentPicker()}
+
+      <DatePickerModal
+        visible={datePickerVisible}
+        onClose={() => setDatePickerVisible(false)}
+        initialValue={dueDate}
+        onSelect={setDueDate}
+        title="Select Due Date"
+      />
     </View>
   );
 };

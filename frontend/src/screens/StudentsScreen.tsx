@@ -7,6 +7,7 @@ import Animated, { FadeInDown, FadeInUp, Layout } from 'react-native-reanimated'
 import apiClient, { BASE_URL } from '../api/client';
 import { useFocusEffect } from '@react-navigation/native';
 import KidsBackground from '../components/KidsBackground';
+import DatePickerModal from '../components/DatePickerModal';
 
 type Props = {
   navigation: any;
@@ -47,6 +48,7 @@ const StudentsScreen: React.FC<Props> = ({ navigation }) => {
   const [emergencyContactName, setEmergencyContactName] = useState('');
   const [emergencyContactPhone, setEmergencyContactPhone] = useState('');
   const [saving, setSaving] = useState(false);
+  const [datePickerVisible, setDatePickerVisible] = useState(false);
 
   // Promote Modal State
   const [modalPromoteVisible, setModalPromoteVisible] = useState(false);
@@ -331,14 +333,16 @@ const StudentsScreen: React.FC<Props> = ({ navigation }) => {
               </View>
 
               <View className="mb-4">
-                <Text className="text-slate-600 font-bold mb-2 ml-1">Date of Birth (YYYY-MM-DD)</Text>
-                <TextInput 
-                  className="bg-slate-50 border border-slate-200 rounded-2xl px-4 py-3.5 text-slate-800 font-medium"
-                  placeholder="e.g. 2018-05-15"
-                  value={dateOfBirth}
-                  onChangeText={setDateOfBirth}
-                  keyboardType="numbers-and-punctuation"
-                />
+                <Text className="text-slate-600 font-bold mb-2 ml-1">Date of Birth</Text>
+                <TouchableOpacity 
+                  onPress={() => setDatePickerVisible(true)}
+                  className="bg-slate-50 border border-slate-200 rounded-2xl px-4 py-3.5 text-slate-800 font-medium flex-row justify-between items-center"
+                >
+                  <Text className={`font-medium ${dateOfBirth ? 'text-slate-800' : 'text-slate-400'}`}>
+                    {dateOfBirth || 'Select Date of Birth'}
+                  </Text>
+                  <Icon name="calendar-outline" size={20} color="#0D9488" />
+                </TouchableOpacity>
               </View>
 
               <View className="mb-4">
@@ -488,6 +492,14 @@ const StudentsScreen: React.FC<Props> = ({ navigation }) => {
           </View>
         </View>
       </Modal>
+
+      <DatePickerModal
+        visible={datePickerVisible}
+        onClose={() => setDatePickerVisible(false)}
+        initialValue={dateOfBirth}
+        onSelect={setDateOfBirth}
+        title="Select Date of Birth"
+      />
     </View>
   );
 };

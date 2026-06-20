@@ -233,7 +233,7 @@ const TransportScreen: React.FC<Props> = ({ navigation }) => {
           {/* Floating Add Route Button */}
           <TouchableOpacity 
             onPress={openAddModal}
-            className="absolute bottom-6 right-6 bg-rose-500 w-16 h-16 rounded-full items-center justify-center shadow-lg"
+            className="absolute bottom-24 right-6 bg-rose-500 w-16 h-16 rounded-full items-center justify-center shadow-lg"
             style={{ shadowColor: '#F43F5E', shadowOffset: { width: 0, height: 6 }, shadowOpacity: 0.3, shadowRadius: 8 }}
           >
             <Icon name="add" size={32} color="#fff" />

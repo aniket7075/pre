@@ -244,7 +244,7 @@ const TimetableScreen: React.FC<Props> = ({ navigation }) => {
       {isAdmin && (
         <TouchableOpacity 
           onPress={openAddModal}
-          className="absolute bottom-6 right-6 bg-pink-500 w-16 h-16 rounded-full items-center justify-center shadow-lg"
+          className="absolute bottom-24 right-6 bg-pink-500 w-16 h-16 rounded-full items-center justify-center shadow-lg"
           style={{ shadowColor: '#EC4899', shadowOffset: { width: 0, height: 6 }, shadowOpacity: 0.3, shadowRadius: 8 }}
         >
           <Icon name="add" size={32} color="#fff" />

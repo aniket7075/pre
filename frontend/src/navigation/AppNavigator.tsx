@@ -56,37 +56,75 @@ const TabNavigator = () => {
         tabBarStyle: {
           backgroundColor: '#ffffff',
           borderTopWidth: 0,
-          elevation: 20,
+          elevation: 25,
           shadowColor: '#000',
-          shadowOffset: { width: 0, height: -5 },
-          shadowOpacity: 0.1,
-          shadowRadius: 10,
-          height: Platform.OS === 'ios' ? 85 : 70,
-          paddingBottom: Platform.OS === 'ios' ? 20 : 10,
+          shadowOffset: { width: 0, height: -8 },
+          shadowOpacity: 0.12,
+          shadowRadius: 15,
+          height: Platform.OS === 'ios' ? 90 : 75,
+          paddingBottom: Platform.OS === 'ios' ? 24 : 12,
           paddingTop: 10,
           position: 'absolute',
-          borderTopLeftRadius: 25,
-          borderTopRightRadius: 25,
+          borderTopLeftRadius: 30,
+          borderTopRightRadius: 30,
         },
-        tabBarIcon: ({ focused, color }) => {
+        tabBarIcon: ({ focused }) => {
           let iconName = 'home';
-          if (route.name === 'Home') iconName = focused ? 'home' : 'home-outline';
-          else if (route.name === 'Notices') iconName = focused ? 'megaphone' : 'megaphone-outline';
-          else if (route.name === 'Chats') iconName = focused ? 'chatbubbles' : 'chatbubbles-outline';
-          else if (route.name === 'Leaves') iconName = focused ? 'document-text' : 'document-text-outline';
-          else if (route.name === 'Profile') iconName = focused ? 'person-circle' : 'person-circle-outline';
+          let activeBg = '#EEF2FF';
+          let activeColor = '#4F46E5';
+
+          if (route.name === 'Home') {
+            iconName = focused ? 'home' : 'home-outline';
+            activeBg = '#FEF3C7';
+            activeColor = '#D97706';
+          } else if (route.name === 'Notices') {
+            iconName = focused ? 'megaphone' : 'megaphone-outline';
+            activeBg = '#FCE7F3';
+            activeColor = '#DB2777';
+          } else if (route.name === 'Chats') {
+            iconName = focused ? 'chatbubbles' : 'chatbubbles-outline';
+            activeBg = '#E0F2FE';
+            activeColor = '#0284C7';
+          } else if (route.name === 'Leaves') {
+            iconName = focused ? 'document-text' : 'document-text-outline';
+            activeBg = '#D1FAE5';
+            activeColor = '#059669';
+          } else if (route.name === 'Profile') {
+            iconName = focused ? 'person-circle' : 'person-circle-outline';
+            activeBg = '#F3E8FF';
+            activeColor = '#9333EA';
+          }
 
           return (
-            <View style={{
-              alignItems: 'center',
-              justifyContent: 'center',
-              backgroundColor: focused ? '#EEF2FF' : 'transparent',
-              padding: 10,
-              borderRadius: 20,
-              width: 50,
-              height: 50
-            }}>
-              <Icon name={iconName} size={24} color={focused ? '#4F46E5' : '#94A3B8'} />
+            <View style={{ alignItems: 'center', justifyContent: 'center' }}>
+              <View style={{
+                alignItems: 'center',
+                justifyContent: 'center',
+                backgroundColor: focused ? activeBg : 'transparent',
+                padding: 10,
+                borderRadius: 22,
+                width: 52,
+                height: 52,
+                transform: [{ scale: focused ? 1.08 : 1.0 }],
+                shadowColor: focused ? activeColor : 'transparent',
+                shadowOffset: { width: 0, height: 4 },
+                shadowOpacity: 0.15,
+                shadowRadius: 6,
+                elevation: focused ? 4 : 0,
+              }}>
+                <Icon name={iconName} size={focused ? 26 : 24} color={focused ? activeColor : '#94A3B8'} />
+              </View>
+              {focused && (
+                <View style={{
+                  width: 6,
+                  height: 6,
+                  borderRadius: 3,
+                  backgroundColor: activeColor,
+                  marginTop: 4,
+                  position: 'absolute',
+                  bottom: -10,
+                }} />
+              )}
             </View>
           );
         },

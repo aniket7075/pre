@@ -104,7 +104,7 @@ const ChatListScreen: React.FC<Props> = ({ navigation }) => {
       />
 
       {(user?.role === 'teacher' || user?.role === 'school_admin' || user?.role === 'super_admin') && (
-        <Animated.View entering={FadeInUp.delay(300).duration(500)} className="absolute bottom-6 right-6">
+        <Animated.View entering={FadeInUp.delay(300).duration(500)} className="absolute bottom-24 right-6">
           <TouchableOpacity
             onPress={() => setModalVisible(true)}
             className="bg-blue-600 w-16 h-16 rounded-full items-center justify-center"

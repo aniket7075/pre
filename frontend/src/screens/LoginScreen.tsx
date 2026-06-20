@@ -1,6 +1,15 @@
 import React, { useState } from 'react';
 import { View, Text, TextInput, TouchableOpacity, StyleSheet, KeyboardAvoidingView, Platform, Dimensions, Image } from 'react-native';
-import Animated, { FadeInDown, FadeInUp, useSharedValue, useAnimatedStyle, withRepeat, withSequence, withTiming } from 'react-native-reanimated';
+import Animated, { 
+  FadeInDown, 
+  FadeInUp, 
+  useSharedValue, 
+  useAnimatedStyle, 
+  withRepeat, 
+  withSequence, 
+  withTiming, 
+  withSpring 
+} from 'react-native-reanimated';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { useDispatch, useSelector } from 'react-redux';
 import { login, clearError } from '../store/slices/authSlice';
@@ -22,7 +31,7 @@ const LoginScreen: React.FC<Props> = ({ navigation }) => {
   const [passwordFocused, setPasswordFocused] = useState(false);
 
   const dispatch = useDispatch<AppDispatch>();
-  const { isLoading, error } = useSelector((state: RootState) => state.auth);
+  const { isLoading } = useSelector((state: RootState) => state.auth);
 
   // Floating animation for the top icon
   const translateY = useSharedValue(0);
@@ -41,13 +50,74 @@ const LoginScreen: React.FC<Props> = ({ navigation }) => {
     transform: [{ translateY: translateY.value }]
   }));
 
+  // Floating label animation values
+  const emailFocusVal = useSharedValue(email ? 1 : 0);
+  const passwordFocusVal = useSharedValue(password ? 1 : 0);
+
+  React.useEffect(() => {
+    emailFocusVal.value = withTiming(email || emailFocused ? 1 : 0, { duration: 180 });
+  }, [email, emailFocused]);
+
+  React.useEffect(() => {
+    passwordFocusVal.value = withTiming(password || passwordFocused ? 1 : 0, { duration: 180 });
+  }, [password, passwordFocused]);
+
+  const emailLabelStyle = useAnimatedStyle(() => ({
+    transform: [
+      { translateY: emailFocusVal.value === 1 ? -12 : 18 },
+      { translateX: emailFocusVal.value === 1 ? 5 : 44 }
+    ],
+    fontSize: emailFocusVal.value === 1 ? 12 : 15,
+    color: emailFocusVal.value === 1 ? '#6366F1' : '#94A3B8',
+    backgroundColor: emailFocusVal.value === 1 ? '#ffffff' : 'transparent',
+    paddingHorizontal: emailFocusVal.value === 1 ? 6 : 0,
+  }));
+
+  const passwordLabelStyle = useAnimatedStyle(() => ({
+    transform: [
+      { translateY: passwordFocusVal.value === 1 ? -12 : 18 },
+      { translateX: passwordFocusVal.value === 1 ? 5 : 44 }
+    ],
+    fontSize: passwordFocusVal.value === 1 ? 12 : 15,
+    color: passwordFocusVal.value === 1 ? '#6366F1' : '#94A3B8',
+    backgroundColor: passwordFocusVal.value === 1 ? '#ffffff' : 'transparent',
+    paddingHorizontal: passwordFocusVal.value === 1 ? 6 : 0,
+  }));
+
+  // Shake animation for login failures
+  const shakeX = useSharedValue(0);
+  const shakeCard = () => {
+    shakeX.value = withSequence(
+      withTiming(-10, { duration: 80 }),
+      withTiming(10, { duration: 80 }),
+      withTiming(-10, { duration: 80 }),
+      withTiming(10, { duration: 80 }),
+      withTiming(0, { duration: 80 })
+    );
+  };
+
+  const cardStyle = useAnimatedStyle(() => ({
+    transform: [{ translateX: shakeX.value }]
+  }));
+
+  // Button Tap scaling animation
+  const buttonScale = useSharedValue(1);
+  const btnPressIn = () => { buttonScale.value = withSpring(0.95); };
+  const btnPressOut = () => { buttonScale.value = withSpring(1); };
+  
+  const buttonStyle = useAnimatedStyle(() => ({
+    transform: [{ scale: buttonScale.value }]
+  }));
+
   const handleLogin = async () => {
     if (!email || !password) {
+      shakeCard();
       Alert.alert('Oops!', 'Please fill in both email and password.');
       return;
     }
     const resultAction = await dispatch(login({ email, password }));
     if (login.rejected.match(resultAction)) {
+      shakeCard();
       Alert.alert('Login Failed', resultAction.payload as string);
       dispatch(clearError());
     }
@@ -67,20 +137,22 @@ const LoginScreen: React.FC<Props> = ({ navigation }) => {
         <Animated.View style={[styles.logoContainer, floatingStyle]}>
           <Image source={logoImg} style={styles.logoImage} resizeMode="contain" />
         </Animated.View>
-        <Text style={styles.welcomeText}>Qidoo</Text>
+        <Text style={styles.welcomeText}>Qodo</Text>
         <Text style={styles.subText}>Learn, Play & Grow!</Text>
       </Animated.View>
 
-      <Animated.View entering={FadeInUp.delay(400).duration(800)} style={styles.card}>
+      <Animated.View style={[styles.card, cardStyle]} entering={FadeInUp.delay(400).duration(800)}>
         
-        <View style={styles.inputContainer}>
-          <Text style={styles.label}>Email Address</Text>
+        {/* Email Field */}
+        <Animated.View entering={FadeInUp.delay(500).duration(600)} style={styles.inputContainer}>
           <View style={[styles.inputWrapper, emailFocused && styles.inputWrapperFocused]}>
+            <Animated.Text style={[styles.animatedLabel, emailLabelStyle]}>
+              Email Address
+            </Animated.Text>
             <Icon name="mail-outline" size={20} color={emailFocused ? '#6366F1' : '#a0aec0'} style={styles.inputIcon} />
             <TextInput
               style={styles.input}
-              placeholder="Enter your email"
-              placeholderTextColor="#a0aec0"
+              placeholder=""
               value={email}
               onChangeText={setEmail}
               keyboardType="email-address"
@@ -89,16 +161,18 @@ const LoginScreen: React.FC<Props> = ({ navigation }) => {
               onBlur={() => setEmailFocused(false)}
             />
           </View>
-        </View>
+        </Animated.View>
 
-        <View style={styles.inputContainer}>
-          <Text style={styles.label}>Password</Text>
+        {/* Password Field */}
+        <Animated.View entering={FadeInUp.delay(650).duration(600)} style={styles.inputContainer}>
           <View style={[styles.inputWrapper, passwordFocused && styles.inputWrapperFocused]}>
+            <Animated.Text style={[styles.animatedLabel, passwordLabelStyle]}>
+              Password
+            </Animated.Text>
             <Icon name="lock-closed-outline" size={20} color={passwordFocused ? '#6366F1' : '#a0aec0'} style={styles.inputIcon} />
             <TextInput
               style={styles.input}
-              placeholder="Enter password"
-              placeholderTextColor="#a0aec0"
+              placeholder=""
               value={password}
               onChangeText={setPassword}
               secureTextEntry
@@ -106,22 +180,32 @@ const LoginScreen: React.FC<Props> = ({ navigation }) => {
               onBlur={() => setPasswordFocused(false)}
             />
           </View>
-        </View>
+        </Animated.View>
 
         <TouchableOpacity style={styles.forgotPassword}>
           <Text style={styles.forgotText}>Forgot password?</Text>
         </TouchableOpacity>
 
-        <TouchableOpacity style={styles.loginButton} onPress={handleLogin} activeOpacity={0.8} disabled={isLoading}>
-          {isLoading ? (
-            <ActivityIndicator color="#fff" />
-          ) : (
-            <View style={styles.btnContent}>
-              <Text style={styles.loginButtonText}>Login to Start</Text>
-              <Icon name="arrow-forward-circle" size={24} color="#fff" style={{ marginLeft: 8 }} />
-            </View>
-          )}
-        </TouchableOpacity>
+        {/* Animated Login Button */}
+        <Animated.View entering={FadeInUp.delay(800).duration(600)} style={buttonStyle}>
+          <TouchableOpacity 
+            style={styles.loginButton} 
+            onPress={handleLogin} 
+            activeOpacity={0.9} 
+            disabled={isLoading}
+            onPressIn={btnPressIn}
+            onPressOut={btnPressOut}
+          >
+            {isLoading ? (
+              <ActivityIndicator color="#fff" />
+            ) : (
+              <View style={styles.btnContent}>
+                <Text style={styles.loginButtonText}>Login to Start</Text>
+                <Icon name="arrow-forward-circle" size={24} color="#fff" style={{ marginLeft: 8 }} />
+              </View>
+            )}
+          </TouchableOpacity>
+        </Animated.View>
       </Animated.View>
     </KeyboardAvoidingView>
   );
@@ -212,13 +296,14 @@ const styles = StyleSheet.create({
   },
   inputContainer: {
     marginBottom: 20,
+    position: 'relative',
   },
-  label: {
-    fontSize: 14,
+  animatedLabel: {
+    position: 'absolute',
+    left: 0,
+    top: 0,
+    zIndex: 10,
     fontWeight: '800',
-    color: '#475569',
-    marginBottom: 8,
-    marginLeft: 5,
   },
   inputWrapper: {
     flexDirection: 'row',
@@ -228,6 +313,8 @@ const styles = StyleSheet.create({
     borderColor: '#E2E8F0',
     borderRadius: 18,
     paddingHorizontal: 15,
+    height: 58,
+    position: 'relative',
   },
   inputWrapperFocused: {
     borderColor: '#6366F1',
@@ -240,13 +327,16 @@ const styles = StyleSheet.create({
   },
   inputIcon: {
     marginRight: 10,
+    marginTop: 18, // Pushed down to align with placeholder height
   },
   input: {
     flex: 1,
-    paddingVertical: 14,
+    height: '100%',
     fontSize: 16,
     color: '#1E293B',
     fontWeight: '600',
+    paddingVertical: 0,
+    marginTop: 18, // Pushed down to avoid overlapping floating labels
   },
   forgotPassword: {
     alignSelf: 'center',

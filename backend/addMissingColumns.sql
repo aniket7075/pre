@@ -3,9 +3,22 @@
 ALTER TABLE students
   ADD COLUMN IF NOT EXISTS grade VARCHAR(50);
 
--- 4. Make date_of_birth nullable (so Add Family works without a DOB value)
+-- 4. Make all optional student fields nullable (so Add Family works without them)
 ALTER TABLE students
   ALTER COLUMN date_of_birth DROP NOT NULL;
+
+ALTER TABLE students
+  ALTER COLUMN emergency_contact_name DROP NOT NULL;
+
+ALTER TABLE students
+  ALTER COLUMN emergency_contact_phone DROP NOT NULL;
+
+-- Add missing columns to students if not present
+ALTER TABLE students
+  ADD COLUMN IF NOT EXISTS emergency_contact_name VARCHAR(100);
+
+ALTER TABLE students
+  ADD COLUMN IF NOT EXISTS emergency_contact_phone VARCHAR(20);
 
 -- 2. Add grade column to fee_structures
 ALTER TABLE fee_structures

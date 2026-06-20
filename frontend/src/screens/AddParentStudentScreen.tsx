@@ -24,7 +24,7 @@ const AddParentStudentScreen: React.FC<Props> = ({ navigation }) => {
   
   // Dynamic state for multiple children
   const [children, setChildren] = useState<any[]>([
-    { id: 1, name: '', admissionNumber: '', grade: '', age: '', profileImage: null }
+    { id: 1, name: '', admissionNumber: '', grade: '', age: '', gender: 'male', dateOfBirth: '', bloodGroup: '', emergencyContactName: '', emergencyContactPhone: '', profileImage: null }
   ]);
 
   const addChild = () => {
@@ -32,7 +32,7 @@ const AddParentStudentScreen: React.FC<Props> = ({ navigation }) => {
       Alert.alert("Limit Reached", "You can add up to 3 children at once.");
       return;
     }
-    setChildren([...children, { id: Date.now(), name: '', admissionNumber: '', grade: '', age: '', profileImage: null }]);
+    setChildren([...children, { id: Date.now(), name: '', admissionNumber: '', grade: '', age: '', gender: 'male', dateOfBirth: '', bloodGroup: '', emergencyContactName: '', emergencyContactPhone: '', profileImage: null }]);
   };
 
   const removeChild = (id: number) => {
@@ -281,6 +281,82 @@ const AddParentStudentScreen: React.FC<Props> = ({ navigation }) => {
                     keyboardType="numeric"
                     value={child.age}
                     onChangeText={(val) => updateChild(child.id, 'age', val)}
+                    placeholderTextColor="#94A3B8"
+                  />
+                </View>
+              </View>
+
+              {/* Date of Birth */}
+              <View className="mb-4">
+                <Text className="text-xs text-slate-500 mb-1 font-bold uppercase tracking-wider ml-1">Date of Birth (YYYY-MM-DD)</Text>
+                <TextInput 
+                  className="bg-slate-50 border border-slate-100 rounded-2xl p-4 text-slate-800 font-medium"
+                  placeholder="e.g. 2018-05-15"
+                  value={child.dateOfBirth}
+                  onChangeText={(val) => updateChild(child.id, 'dateOfBirth', val)}
+                  placeholderTextColor="#94A3B8"
+                  keyboardType="numbers-and-punctuation"
+                />
+              </View>
+
+              {/* Gender */}
+              <View className="mb-4">
+                <Text className="text-xs text-slate-500 mb-1 font-bold uppercase tracking-wider ml-1">Gender</Text>
+                <View className="flex-row gap-2">
+                  {['male', 'female', 'other'].map((g) => (
+                    <TouchableOpacity
+                      key={g}
+                      onPress={() => updateChild(child.id, 'gender', g)}
+                      className={`flex-1 p-3 rounded-2xl items-center border ${child.gender === g ? 'bg-teal-600 border-teal-600' : 'bg-slate-50 border-slate-100'}`}
+                    >
+                      <Text className={`font-bold capitalize text-sm ${child.gender === g ? 'text-white' : 'text-slate-500'}`}>
+                        {g === 'male' ? '👦 Male' : g === 'female' ? '👧 Female' : '⚧ Other'}
+                      </Text>
+                    </TouchableOpacity>
+                  ))}
+                </View>
+              </View>
+
+              {/* Blood Group */}
+              <View className="mb-4">
+                <Text className="text-xs text-slate-500 mb-1 font-bold uppercase tracking-wider ml-1">Blood Group</Text>
+                <View className="flex-row flex-wrap gap-2">
+                  {['A+', 'A-', 'B+', 'B-', 'AB+', 'AB-', 'O+', 'O-'].map((bg) => (
+                    <TouchableOpacity
+                      key={bg}
+                      onPress={() => updateChild(child.id, 'bloodGroup', child.bloodGroup === bg ? '' : bg)}
+                      className={`px-4 py-2 rounded-xl border ${child.bloodGroup === bg ? 'bg-red-500 border-red-500' : 'bg-slate-50 border-slate-100'}`}
+                    >
+                      <Text className={`font-bold text-sm ${child.bloodGroup === bg ? 'text-white' : 'text-slate-500'}`}>{bg}</Text>
+                    </TouchableOpacity>
+                  ))}
+                </View>
+              </View>
+
+              {/* Emergency Contact */}
+              <View className="bg-orange-50 p-4 rounded-2xl border border-orange-100 mb-2">
+                <View className="flex-row items-center mb-3">
+                  <Icon name="warning" size={16} color="#F97316" />
+                  <Text className="text-xs font-black text-orange-700 ml-1 uppercase tracking-wider">Emergency Contact</Text>
+                </View>
+                <View className="mb-3">
+                  <Text className="text-xs text-slate-500 mb-1 font-bold uppercase tracking-wider ml-1">Contact Person Name</Text>
+                  <TextInput
+                    className="bg-white border border-orange-100 rounded-2xl p-4 text-slate-800 font-medium"
+                    placeholder="e.g. Grandparent / Relative"
+                    value={child.emergencyContactName}
+                    onChangeText={(val) => updateChild(child.id, 'emergencyContactName', val)}
+                    placeholderTextColor="#94A3B8"
+                  />
+                </View>
+                <View>
+                  <Text className="text-xs text-slate-500 mb-1 font-bold uppercase tracking-wider ml-1">Contact Phone</Text>
+                  <TextInput
+                    className="bg-white border border-orange-100 rounded-2xl p-4 text-slate-800 font-medium"
+                    placeholder="e.g. 9876543210"
+                    value={child.emergencyContactPhone}
+                    onChangeText={(val) => updateChild(child.id, 'emergencyContactPhone', val)}
+                    keyboardType="phone-pad"
                     placeholderTextColor="#94A3B8"
                   />
                 </View>

@@ -22,6 +22,11 @@ interface Student {
   parent_name?: string;
   contact_number?: string;
   profile_image_url?: string;
+  date_of_birth?: string;
+  gender?: string;
+  blood_group?: string;
+  emergency_contact_name?: string;
+  emergency_contact_phone?: string;
 }
 
 const StudentsScreen: React.FC<Props> = ({ navigation }) => {
@@ -35,6 +40,12 @@ const StudentsScreen: React.FC<Props> = ({ navigation }) => {
   const [firstName, setFirstName] = useState('');
   const [lastName, setLastName] = useState('');
   const [admissionNumber, setAdmissionNumber] = useState('');
+  const [grade, setGrade] = useState('');
+  const [dateOfBirth, setDateOfBirth] = useState('');
+  const [gender, setGender] = useState('male');
+  const [bloodGroup, setBloodGroup] = useState('');
+  const [emergencyContactName, setEmergencyContactName] = useState('');
+  const [emergencyContactPhone, setEmergencyContactPhone] = useState('');
   const [saving, setSaving] = useState(false);
 
   // Promote Modal State
@@ -67,6 +78,12 @@ const StudentsScreen: React.FC<Props> = ({ navigation }) => {
     setFirstName(student.first_name);
     setLastName(student.last_name);
     setAdmissionNumber(student.admission_number || '');
+    setGrade(student.grade || '');
+    setDateOfBirth(student.date_of_birth || '');
+    setGender(student.gender || 'male');
+    setBloodGroup(student.blood_group || '');
+    setEmergencyContactName(student.emergency_contact_name || '');
+    setEmergencyContactPhone(student.emergency_contact_phone || '');
     setModalVisible(true);
   };
 
@@ -81,6 +98,12 @@ const StudentsScreen: React.FC<Props> = ({ navigation }) => {
         firstName,
         lastName,
         admissionNumber,
+        grade,
+        gender,
+        dateOfBirth: dateOfBirth || null,
+        bloodGroup: bloodGroup || null,
+        emergencyContactName: emergencyContactName || null,
+        emergencyContactPhone: emergencyContactPhone || null,
         isActive: true
       });
       Alert.alert('Success', 'Student updated successfully');
@@ -177,6 +200,9 @@ const StudentsScreen: React.FC<Props> = ({ navigation }) => {
           </View>
         )}
         <View className="flex-row mt-auto">
+          <TouchableOpacity onPress={() => navigation.navigate('StudentProfile', { student: item })} className="p-2 bg-slate-50 rounded-full mr-2">
+            <Icon name="eye" size={20} color="#3B82F6" />
+          </TouchableOpacity>
           <TouchableOpacity onPress={() => openEditModal(item)} className="p-2 bg-slate-50 rounded-full mr-2">
             <Icon name="pencil" size={20} color="#0D9488" />
           </TouchableOpacity>
@@ -261,7 +287,7 @@ const StudentsScreen: React.FC<Props> = ({ navigation }) => {
               </TouchableOpacity>
             </View>
 
-            <ScrollView showsVerticalScrollIndicator={false}>
+            <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={{ paddingBottom: 40 }}>
               <View className="flex-row space-x-4 mb-4">
                 <View className="flex-1 pr-2">
                   <Text className="text-slate-600 font-bold mb-2 ml-1">First Name</Text>
@@ -283,7 +309,7 @@ const StudentsScreen: React.FC<Props> = ({ navigation }) => {
                 </View>
               </View>
 
-              <View className="mb-6">
+              <View className="mb-4">
                 <Text className="text-slate-600 font-bold mb-2 ml-1">Admission Number</Text>
                 <TextInput 
                   className="bg-slate-50 border border-slate-200 rounded-2xl px-4 py-3.5 text-slate-800 font-medium"
@@ -292,6 +318,85 @@ const StudentsScreen: React.FC<Props> = ({ navigation }) => {
                   onChangeText={setAdmissionNumber}
                   autoCapitalize="characters"
                 />
+              </View>
+
+              <View className="mb-4">
+                <Text className="text-slate-600 font-bold mb-2 ml-1">Grade/Class</Text>
+                <TextInput 
+                  className="bg-slate-50 border border-slate-200 rounded-2xl px-4 py-3.5 text-slate-800 font-medium"
+                  placeholder="e.g. 1st Grade"
+                  value={grade}
+                  onChangeText={setGrade}
+                />
+              </View>
+
+              <View className="mb-4">
+                <Text className="text-slate-600 font-bold mb-2 ml-1">Date of Birth (YYYY-MM-DD)</Text>
+                <TextInput 
+                  className="bg-slate-50 border border-slate-200 rounded-2xl px-4 py-3.5 text-slate-800 font-medium"
+                  placeholder="e.g. 2018-05-15"
+                  value={dateOfBirth}
+                  onChangeText={setDateOfBirth}
+                  keyboardType="numbers-and-punctuation"
+                />
+              </View>
+
+              <View className="mb-4">
+                <Text className="text-slate-600 font-bold mb-2 ml-1">Gender</Text>
+                <View className="flex-row gap-2">
+                  {['male', 'female', 'other'].map((g) => (
+                    <TouchableOpacity
+                      key={g}
+                      onPress={() => setGender(g)}
+                      className={`flex-1 p-3 rounded-2xl items-center border ${gender === g ? 'bg-teal-600 border-teal-600' : 'bg-slate-50 border-slate-200'}`}
+                    >
+                      <Text className={`font-bold capitalize text-sm ${gender === g ? 'text-white' : 'text-slate-500'}`}>
+                        {g === 'male' ? '👦 Male' : g === 'female' ? '👧 Female' : '⚧ Other'}
+                      </Text>
+                    </TouchableOpacity>
+                  ))}
+                </View>
+              </View>
+
+              <View className="mb-4">
+                <Text className="text-slate-600 font-bold mb-2 ml-1">Blood Group</Text>
+                <View className="flex-row flex-wrap gap-2">
+                  {['A+', 'A-', 'B+', 'B-', 'AB+', 'AB-', 'O+', 'O-'].map((bg) => (
+                    <TouchableOpacity
+                      key={bg}
+                      onPress={() => setBloodGroup(bloodGroup === bg ? '' : bg)}
+                      className={`px-4 py-2 rounded-xl border ${bloodGroup === bg ? 'bg-red-500 border-red-500' : 'bg-slate-50 border-slate-200'}`}
+                    >
+                      <Text className={`font-bold text-sm ${bloodGroup === bg ? 'text-white' : 'text-slate-500'}`}>{bg}</Text>
+                    </TouchableOpacity>
+                  ))}
+                </View>
+              </View>
+
+              <View className="bg-orange-50 p-4 rounded-2xl border border-orange-100 mb-6">
+                <View className="flex-row items-center mb-3">
+                  <Icon name="warning" size={16} color="#F97316" />
+                  <Text className="text-xs font-black text-orange-700 ml-1 uppercase tracking-wider">Emergency Contact</Text>
+                </View>
+                <View className="mb-3">
+                  <Text className="text-xs text-slate-500 mb-1 font-bold uppercase tracking-wider ml-1">Contact Person Name</Text>
+                  <TextInput
+                    className="bg-white border border-orange-100 rounded-2xl p-4 text-slate-800 font-medium"
+                    placeholder="e.g. Grandparent / Relative"
+                    value={emergencyContactName}
+                    onChangeText={setEmergencyContactName}
+                  />
+                </View>
+                <View>
+                  <Text className="text-xs text-slate-500 mb-1 font-bold uppercase tracking-wider ml-1">Contact Phone</Text>
+                  <TextInput
+                    className="bg-white border border-orange-100 rounded-2xl p-4 text-slate-800 font-medium"
+                    placeholder="e.g. 9876543210"
+                    value={emergencyContactPhone}
+                    onChangeText={setEmergencyContactPhone}
+                    keyboardType="phone-pad"
+                  />
+                </View>
               </View>
 
               <TouchableOpacity 

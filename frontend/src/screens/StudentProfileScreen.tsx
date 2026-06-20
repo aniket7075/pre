@@ -129,7 +129,7 @@ const StudentProfileScreen: React.FC<Props> = ({ navigation, route }) => {
         </View>
 
         {/* Personal Details Card */}
-        <View className="px-5 mb-8">
+        <View className="px-5 mb-6">
           <Text className="text-sm font-bold text-slate-400 uppercase tracking-widest mb-3 ml-1">Personal Details</Text>
           <View className="bg-white rounded-3xl p-5 shadow-sm border border-slate-100">
             <View className="flex-row justify-between mb-4">
@@ -152,6 +152,23 @@ const StudentProfileScreen: React.FC<Props> = ({ navigation, route }) => {
                 <Text className="text-sm font-bold text-slate-800 mt-1">
                   {student.created_at ? new Date(student.created_at).toLocaleDateString() : 'Unknown'}
                 </Text>
+              </View>
+            </View>
+          </View>
+        </View>
+
+        {/* Emergency Contact Card */}
+        <View className="px-5 mb-8">
+          <Text className="text-sm font-bold text-slate-400 uppercase tracking-widest mb-3 ml-1">Emergency Contact</Text>
+          <View className="bg-orange-50 rounded-3xl p-5 border border-orange-100 shadow-sm">
+            <View className="flex-row justify-between">
+              <View className="flex-1">
+                <Text className="text-xs text-orange-700 font-black uppercase">Contact Person</Text>
+                <Text className="text-sm font-bold text-slate-800 mt-1">{student.emergency_contact_name || 'Not specified'}</Text>
+              </View>
+              <View className="flex-1 pl-4">
+                <Text className="text-xs text-orange-700 font-black uppercase">Phone Number</Text>
+                <Text className="text-sm font-bold text-slate-800 mt-1">{student.emergency_contact_phone || 'Not specified'}</Text>
               </View>
             </View>
           </View>

@@ -115,7 +115,7 @@ export const getAllStudents = async (req: AuthRequest, res: Response): Promise<v
       SELECT 
         s.id, s.first_name, s.last_name, s.admission_number, s.grade,
         s.is_active, s.profile_image_url, s.date_of_birth, s.gender,
-        s.blood_group, s.created_at,
+        s.blood_group, s.created_at, s.emergency_contact_name, s.emergency_contact_phone,
         p.name AS parent_name, p.email AS parent_email, 
         p.contact_number, p.alternative_mobile, p.address
       FROM students s
@@ -192,14 +192,16 @@ export const addFamily = async (req: AuthRequest, res: Response): Promise<void> 
 
       const childResult = await client.query(
         `INSERT INTO students (parent_id, first_name, last_name, admission_number, grade, 
-          date_of_birth, gender, blood_group, profile_image_url)
-         VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
+          date_of_birth, gender, blood_group, profile_image_url, emergency_contact_name, emergency_contact_phone)
+         VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)
          RETURNING id, first_name, last_name, admission_number`,
         [
           parentId, firstName, lastName, admissionNum, child.grade || null,
           child.dateOfBirth || child.date_of_birth || null,   // nullable – no crash if omitted
           child.gender || 'male',
-          child.bloodGroup || null, child.profileImageUrl || null
+          child.bloodGroup || null, child.profileImageUrl || null,
+          child.emergencyContactName || child.emergency_contact_name || null,
+          child.emergencyContactPhone || child.emergency_contact_phone || null
         ]
       );
       insertedChildren.push(childResult.rows[0]);
@@ -222,17 +224,42 @@ export const addFamily = async (req: AuthRequest, res: Response): Promise<void> 
 
 export const updateStudent = async (req: AuthRequest, res: Response): Promise<void> => {
   const { id } = req.params;
-  const { firstName, lastName, admissionNumber, grade, isActive, gender, dateOfBirth, bloodGroup } = req.body;
+  const { 
+    firstName, 
+    lastName, 
+    admissionNumber, 
+    grade, 
+    isActive, 
+    gender, 
+    dateOfBirth, 
+    bloodGroup, 
+    emergencyContactName, 
+    emergencyContactPhone 
+  } = req.body;
   try {
     const result = await pool.query(
       `UPDATE students 
        SET first_name = $1, last_name = $2, admission_number = $3, grade = $4,
            is_active = $5, gender = COALESCE($6::gender_type, gender),
-           date_of_birth = COALESCE($7, date_of_birth),
+           date_of_birth = $7,
            blood_group = COALESCE($8::blood_group_type, blood_group),
+           emergency_contact_name = $9,
+           emergency_contact_phone = $10,
            updated_at = NOW() 
-       WHERE id = $9 RETURNING id, first_name, last_name, admission_number, grade, is_active`,
-      [firstName, lastName, admissionNumber, grade, isActive ?? true, gender || null, dateOfBirth || null, bloodGroup || null, id]
+       WHERE id = $11 RETURNING id, first_name, last_name, admission_number, grade, is_active`,
+      [
+        firstName, 
+        lastName, 
+        admissionNumber, 
+        grade, 
+        isActive ?? true, 
+        gender || null, 
+        dateOfBirth || null, 
+        bloodGroup || null,
+        emergencyContactName || null,
+        emergencyContactPhone || null,
+        id
+      ]
     );
     
     if (result.rows.length === 0) {

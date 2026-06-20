@@ -60,6 +60,7 @@ export const getMyChildren = async (req: AuthRequest, res: Response): Promise<vo
     const result = await pool.query(
       `SELECT s.id, s.first_name, s.last_name, s.admission_number, s.grade, s.age, s.profile_image_url,
               s.date_of_birth, s.gender, s.blood_group, s.is_active,
+              s.emergency_contact_name, s.emergency_contact_phone,
               p.name AS parent_name, p.email AS parent_email, p.contact_number, p.alternative_mobile, p.address
        FROM students s
        JOIN parents p ON s.parent_id = p.id

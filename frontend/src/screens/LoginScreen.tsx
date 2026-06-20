@@ -135,7 +135,7 @@ const LoginScreen: React.FC<Props> = ({ navigation }) => {
       
       <Animated.View entering={FadeInDown.delay(200).duration(800)} style={styles.headerContainer}>
         <Animated.View style={[styles.logoContainer, floatingStyle]}>
-          <Image source={logoImg} style={styles.logoImage} resizeMode="contain" />
+          <Image source={logoImg} style={styles.logoImage as any} resizeMode="contain" />
         </Animated.View>
         <Text style={styles.welcomeText}>Qodo</Text>
         <Text style={styles.subText}>Learn, Play & Grow!</Text>
@@ -252,28 +252,19 @@ const styles = StyleSheet.create({
     zIndex: 10,
   },
   logoContainer: {
-    width: 110,
-    height: 110,
-    backgroundColor: '#ffffff',
-    borderRadius: 35,
+    width: 250,
+    height: 200,
     justifyContent: 'center',
     alignItems: 'center',
     marginBottom: 16,
-    shadowColor: '#6366F1',
-    shadowOffset: { width: 0, height: 10 },
-    shadowOpacity: 0.12,
-    shadowRadius: 15,
-    elevation: 8,
-    borderWidth: 3,
-    borderColor: '#ffffff',
   },
   logoImage: {
-    width: 90,
-    height: 90,
+    width: 200,
+    height: 200,
   },
   welcomeText: {
     fontSize: 40,
-    fontWeight: '950',
+    fontWeight: '900',
     color: '#1E3A8A',
     letterSpacing: 0.5,
   },

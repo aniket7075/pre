@@ -70,7 +70,7 @@ const SplashScreen: React.FC<Props> = ({ navigation }) => {
       <View style={[styles.circle, styles.circle3]} />
 
       <Animated.View style={[styles.logoContainer, logoStyle]}>
-        <Image source={logoImg} style={styles.logoImage} resizeMode="contain" />
+        <Image source={logoImg} style={styles.logoImage as any} resizeMode="contain" />
       </Animated.View>
 
       <Animated.View style={textStyle}>
@@ -116,28 +116,19 @@ const styles = StyleSheet.create({
     left: width * 0.8,
   },
   logoContainer: {
-    width: 130,
-    height: 130,
-    backgroundColor: '#ffffff',
-    borderRadius: 40,
+    width: 180,
+    height: 180,
     justifyContent: 'center',
     alignItems: 'center',
-    elevation: 10,
-    shadowColor: '#6366F1',
-    shadowOffset: { width: 0, height: 8 },
-    shadowOpacity: 0.15,
-    shadowRadius: 12,
     marginBottom: 25,
-    borderWidth: 3,
-    borderColor: '#ffffff',
   },
   logoImage: {
-    width: 100,
-    height: 100,
+    width: 180,
+    height: 180,
   },
   title: {
     fontSize: 44,
-    fontWeight: '950',
+    fontWeight: '900',
     color: '#1E3A8A', // Vibrant dark blue
     textAlign: 'center',
     letterSpacing: 0.5,

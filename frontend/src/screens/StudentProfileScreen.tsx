@@ -3,6 +3,8 @@ import { View, Text, ScrollView, TouchableOpacity, Image } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import Icon from 'react-native-vector-icons/Ionicons';
+import KidsBackground from '../components/KidsBackground';
+import { BASE_URL } from '../api/client';
 
 type Props = {
   navigation: NativeStackNavigationProp<any, any>;
@@ -14,6 +16,7 @@ const StudentProfileScreen: React.FC<Props> = ({ navigation, route }) => {
 
   return (
     <SafeAreaView className="flex-1 bg-slate-50">
+      <KidsBackground />
       {/* Header */}
       <View className="flex-row items-center justify-between p-5 bg-white shadow-sm z-10">
         <TouchableOpacity onPress={() => navigation.goBack()} className="p-2 bg-slate-50 rounded-full">
@@ -26,8 +29,12 @@ const StudentProfileScreen: React.FC<Props> = ({ navigation, route }) => {
       <ScrollView className="flex-1" showsVerticalScrollIndicator={false}>
         {/* Top Profile Card */}
         <View className="bg-white items-center pt-8 pb-6 px-5 border-b border-slate-100">
-          <View className="w-28 h-28 bg-teal-100 rounded-full items-center justify-center mb-4 border-4 border-white shadow-sm">
-            <Icon name="person" size={50} color="#0D9488" />
+          <View className="w-28 h-28 bg-teal-100 rounded-full items-center justify-center mb-4 border-4 border-white shadow-sm overflow-hidden">
+            {student.profile_image_url ? (
+              <Image source={{ uri: `${BASE_URL}${student.profile_image_url}` }} className="w-full h-full" resizeMode="cover" />
+            ) : (
+              <Icon name="person" size={50} color="#0D9488" />
+            )}
           </View>
           <Text className="text-2xl font-black text-slate-800">{student.first_name} {student.last_name}</Text>
           <View className="flex-row items-center mt-2 bg-slate-50 px-3 py-1 rounded-full">
@@ -92,6 +99,32 @@ const StudentProfileScreen: React.FC<Props> = ({ navigation, route }) => {
                 </View>
               </View>
             </View>
+
+            <View className="flex-row justify-between mt-4">
+              <View className="flex-row items-center flex-1">
+                <View className="w-8 h-8 bg-slate-50 rounded-full items-center justify-center mr-2">
+                  <Icon name="call" size={16} color="#64748B" />
+                </View>
+                <View>
+                  <Text className="text-[10px] text-slate-400 font-bold uppercase">Alternative Contact</Text>
+                  <Text className="text-sm font-bold text-slate-700">{student.alternative_mobile || 'N/A'}</Text>
+                </View>
+              </View>
+            </View>
+            
+            {student.address && (
+              <View className="mt-4 pt-4 border-t border-slate-50">
+                <View className="flex-row items-start">
+                  <View className="w-8 h-8 bg-slate-50 rounded-full items-center justify-center mr-2 mt-1">
+                    <Icon name="location" size={16} color="#64748B" />
+                  </View>
+                  <View className="flex-1">
+                    <Text className="text-[10px] text-slate-400 font-bold uppercase">Address</Text>
+                    <Text className="text-sm font-bold text-slate-700 mt-1">{student.address}</Text>
+                  </View>
+                </View>
+              </View>
+            )}
           </View>
         </View>
 

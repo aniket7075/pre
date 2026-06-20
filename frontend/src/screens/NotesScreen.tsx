@@ -3,6 +3,7 @@ import { View, Text, TouchableOpacity } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import Icon from 'react-native-vector-icons/Ionicons';
+import KidsBackground from '../components/KidsBackground';
 
 type Props = {
   navigation: NativeStackNavigationProp<any, any>;
@@ -11,6 +12,7 @@ type Props = {
 const NotesScreen: React.FC<Props> = ({ navigation }) => {
   return (
     <SafeAreaView className="flex-1 bg-background">
+      <KidsBackground />
       <View className="flex-row items-center p-5 bg-primary">
         <TouchableOpacity onPress={() => navigation.goBack()} className="mr-4">
           <Icon name="arrow-back" size={24} color="#fff" />

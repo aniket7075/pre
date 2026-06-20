@@ -6,6 +6,7 @@ import apiClient from '../api/client';
 import { useSelector } from 'react-redux';
 import { RootState } from '../store';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
+import KidsBackground from '../components/KidsBackground';
 
 type Props = { navigation: NativeStackNavigationProp<any, any>; };
 
@@ -153,6 +154,7 @@ const LibraryScreen: React.FC<Props> = ({ navigation }) => {
             const isOverdue = new Date(item.due_date) < new Date() && item.status !== 'returned';
             return (
               <View className="bg-white p-4 rounded-2xl shadow-sm mb-4 border border-gray-100">
+      <KidsBackground />
                 <View className="flex-row justify-between items-start mb-2">
                   <Text className="font-bold text-lg flex-1 mr-2">{item.title}</Text>
                   <View className={`px-2 py-1 rounded-md ${item.status === 'returned' ? 'bg-green-100' : isOverdue ? 'bg-red-100' : 'bg-blue-100'}`}>

@@ -7,6 +7,7 @@ import { RootState } from '../store';
 import apiClient from '../api/client';
 import Animated, { FadeInUp } from 'react-native-reanimated';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
+import KidsBackground from '../components/KidsBackground';
 
 type Props = { navigation: NativeStackNavigationProp<any, any>; };
 
@@ -50,6 +51,7 @@ const ProgressDashboard: React.FC<Props> = ({ navigation }) => {
 
   return (
     <SafeAreaView className="flex-1 bg-background">
+      <KidsBackground />
       <View className="flex-row items-center p-5 bg-primary justify-between">
         <View className="flex-row items-center">
           <TouchableOpacity onPress={() => navigation.goBack()} className="mr-4">
@@ -92,7 +94,7 @@ const ProgressDashboard: React.FC<Props> = ({ navigation }) => {
             {progress?.recentExams?.length > 0 ? progress.recentExams.map((e: any, i: number) => (
               <View key={i} className="flex-row justify-between items-center py-3 border-b border-border/50 last:border-0">
                 <Text className="text-base text-textPrimary font-medium">{e.name}</Text>
-                <View className="bg-indigo-50 px-3 py-1 rounded-full border border-indigo-100">
+                <View className="bg-purple-50 px-3 py-1 rounded-full border border-purple-100">
                   <Text className="text-base font-bold text-primary">{e.marks_obtained}/{e.total_marks}</Text>
                 </View>
               </View>

@@ -5,8 +5,8 @@ module.exports = {
   theme: {
     extend: {
       colors: {
-        primary: "#4F46E5", // Indigo-600
-        primaryLight: "#818CF8", // Indigo-400
+        primary: "#8B5CF6", // Purple-600
+        primaryLight: "#A78BFA", // Lavender-400
         secondary: "#14B8A6", // Teal-500
         secondaryLight: "#5EEAD4", // Teal-300
         accent: "#F43F5E", // Rose-500

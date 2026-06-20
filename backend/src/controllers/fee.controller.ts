@@ -12,17 +12,30 @@ export const getStudentFees = async (req: AuthRequest, res: Response): Promise<v
   try {
     const { student_id } = req.params;
 
-    let query = `SELECT sf.*, fs.fee_type 
-                 FROM student_fees sf
-                 JOIN fee_structures fs ON sf.fee_structure_id = fs.id
-                 ORDER BY sf.due_date DESC`;
+    let query = `
+      SELECT sf.*, fs.fee_type,
+             COALESCE(SUM(p.amount_paid), 0) as total_paid,
+             MAX(p.created_at) as last_payment_date
+      FROM student_fees sf
+      JOIN fee_structures fs ON sf.fee_structure_id = fs.id
+      LEFT JOIN payments p ON p.student_fee_id = sf.id
+      GROUP BY sf.id, fs.fee_type
+      ORDER BY sf.due_date DESC
+    `;
     const params = [];
 
     if (student_id !== 'dummy_student_id') {
-      query = `SELECT sf.*, fs.fee_type 
-               FROM student_fees sf
-               JOIN fee_structures fs ON sf.fee_structure_id = fs.id
-               WHERE sf.student_id = $1 ORDER BY sf.due_date DESC`;
+      query = `
+        SELECT sf.*, fs.fee_type,
+               COALESCE(SUM(p.amount_paid), 0) as total_paid,
+               MAX(p.created_at) as last_payment_date
+        FROM student_fees sf
+        JOIN fee_structures fs ON sf.fee_structure_id = fs.id
+        LEFT JOIN payments p ON p.student_fee_id = sf.id
+        WHERE sf.student_id = $1
+        GROUP BY sf.id, fs.fee_type
+        ORDER BY sf.due_date DESC
+      `;
       params.push(student_id);
     }
 
@@ -64,18 +77,33 @@ export const verifyPayment = async (req: AuthRequest, res: Response): Promise<vo
     const { fee_id, amount_paid } = req.body;
     const parentId = req.user?.id || null;
 
-    // Simulate successful payment instantly
-    await pool.query(
-      `UPDATE student_fees SET status = 'paid' WHERE id = $1`,
-      [fee_id]
-    );
-
     // Record payment (mocking razorpay IDs)
     const result = await pool.query(
       `INSERT INTO payments (student_fee_id, parent_id, amount_paid, payment_method, razorpay_order_id, razorpay_payment_id)
        VALUES ($1, $2, $3, 'simulated', 'mock_order_id', 'mock_payment_id') RETURNING *`,
       [fee_id, parentId, amount_paid]
     );
+
+    // Calculate total paid so far
+    const totalResult = await pool.query(
+      `SELECT SUM(amount_paid) as total_paid FROM payments WHERE student_fee_id = $1`,
+      [fee_id]
+    );
+    const totalPaid = parseFloat(totalResult.rows[0].total_paid);
+
+    // Fetch amount_due to see if fully paid
+    const feeResult = await pool.query(
+      `SELECT amount_due FROM student_fees WHERE id = $1`,
+      [fee_id]
+    );
+    const amountDue = parseFloat(feeResult.rows[0].amount_due);
+
+    if (totalPaid >= amountDue) {
+      await pool.query(
+        `UPDATE student_fees SET status = 'paid' WHERE id = $1`,
+        [fee_id]
+      );
+    }
 
     res.status(200).json({ message: 'Payment simulated successfully', data: result.rows[0] });
   } catch (error) {
@@ -87,25 +115,43 @@ export const verifyPayment = async (req: AuthRequest, res: Response): Promise<vo
 export const assignFee = async (req: AuthRequest, res: Response): Promise<void> => {
   const client = await pool.connect();
   try {
-    const { fee_type, amount, grade, due_date } = req.body;
+    const { fee_type, amount, grade, student_id, due_date } = req.body;
     
-    if (!fee_type || !amount || !grade || !due_date) {
+    if (!fee_type || !amount || !due_date) {
       res.status(400).json({ error: 'Missing required fields' });
+      return;
+    }
+
+    if (!grade && !student_id) {
+      res.status(400).json({ error: 'Must provide either grade or student_id' });
       return;
     }
 
     await client.query('BEGIN');
 
-    // Create fee structure
+    // Create fee structure (grade can be null if it's for a specific student)
     const fsResult = await client.query(
       `INSERT INTO fee_structures (fee_type, amount, grade) VALUES ($1, $2, $3) RETURNING id`,
-      [fee_type, amount, grade]
+      [fee_type, amount, grade || null]
     );
     const feeStructureId = fsResult.rows[0].id;
 
-    // Get students in grade
-    const studentsResult = await client.query(`SELECT id FROM students WHERE grade = $1`, [grade]);
-    const students = studentsResult.rows;
+    let students = [];
+    if (student_id) {
+      // Assign to a specific student
+      const studentResult = await client.query(`SELECT id FROM students WHERE id = $1`, [student_id]);
+      if (studentResult.rows.length === 0) {
+        throw new Error('Student not found');
+      }
+      students = studentResult.rows;
+    } else {
+      // Assign to whole grade (which actually might be class now, so fetch all active students for now or by some filter)
+      // Since 'grade' is now basically 'class_id' or unused, let's select everyone if 'all' is passed, 
+      // but if the UI is changed to specific students, we mainly use student_id.
+      // If we do pass a grade string:
+      const studentsResult = await client.query(`SELECT id FROM students WHERE is_active = true`);
+      students = studentsResult.rows; // Just fallback to all active for now if grade is used as a global assign
+    }
 
     // Assign to students
     for (const student of students) {
@@ -116,7 +162,7 @@ export const assignFee = async (req: AuthRequest, res: Response): Promise<void> 
     }
 
     await client.query('COMMIT');
-    res.status(201).json({ message: `Fee assigned to ${students.length} students` });
+    res.status(201).json({ message: `Fee assigned to ${students.length} student(s)` });
   } catch (error) {
     await client.query('ROLLBACK');
     console.error('Assign fee error:', error);

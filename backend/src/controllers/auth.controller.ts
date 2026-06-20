@@ -12,7 +12,7 @@ export const login = async (req: Request, res: Response): Promise<void> => {
       return;
     }
 
-    const result = await pool.query('SELECT * FROM users WHERE email = $1', [email]);
+    const result = await pool.query('SELECT * FROM users WHERE email = $1 AND is_active = true', [email]);
     
     if (result.rows.length === 0) {
       res.status(401).json({ error: 'Invalid email or password' });
@@ -28,10 +28,13 @@ export const login = async (req: Request, res: Response): Promise<void> => {
       return;
     }
 
+    // Update last login
+    await pool.query('UPDATE users SET last_login = NOW() WHERE id = $1', [user.id]);
+
     const token = jwt.sign(
       { id: user.id, role: user.role, email: user.email },
       process.env.JWT_SECRET || 'your_jwt_secret',
-      { expiresIn: (process.env.JWT_EXPIRES_IN || '1d') as any }
+      { expiresIn: (process.env.JWT_EXPIRES_IN || '7d') as any }
     );
 
     res.json({
@@ -42,7 +45,9 @@ export const login = async (req: Request, res: Response): Promise<void> => {
         email: user.email,
         role: user.role,
         firstName: user.first_name,
-        lastName: user.last_name
+        lastName: user.last_name,
+        phoneNumber: user.phone_number || null,
+        profilePictureUrl: user.profile_picture_url || null,
       }
     });
   } catch (error) {
@@ -53,15 +58,13 @@ export const login = async (req: Request, res: Response): Promise<void> => {
 
 export const register = async (req: Request, res: Response): Promise<void> => {
   try {
-    const { email, password, role, firstName, lastName } = req.body;
+    const { email, password, role, firstName, lastName, phoneNumber } = req.body;
 
-    // Very basic validation
     if (!email || !password || !role || !firstName || !lastName) {
       res.status(400).json({ error: 'All fields are required' });
       return;
     }
 
-    // Check if user exists
     const existing = await pool.query('SELECT id FROM users WHERE email = $1', [email]);
     if (existing.rows.length > 0) {
       res.status(400).json({ error: 'Email already exists' });
@@ -72,9 +75,9 @@ export const register = async (req: Request, res: Response): Promise<void> => {
     const passwordHash = await bcrypt.hash(password, salt);
 
     const result = await pool.query(
-      `INSERT INTO users (email, password_hash, role, first_name, last_name) 
-       VALUES ($1, $2, $3, $4, $5) RETURNING id, email, role, first_name, last_name`,
-      [email, passwordHash, role, firstName, lastName]
+      `INSERT INTO users (email, password_hash, role, first_name, last_name, phone_number) 
+       VALUES ($1, $2, $3, $4, $5, $6) RETURNING id, email, role, first_name, last_name, phone_number, profile_picture_url`,
+      [email, passwordHash, role, firstName, lastName, phoneNumber || null]
     );
 
     const newUser = result.rows[0];
@@ -86,7 +89,9 @@ export const register = async (req: Request, res: Response): Promise<void> => {
         email: newUser.email,
         role: newUser.role,
         firstName: newUser.first_name,
-        lastName: newUser.last_name
+        lastName: newUser.last_name,
+        phoneNumber: newUser.phone_number || null,
+        profilePictureUrl: newUser.profile_picture_url || null,
       }
     });
   } catch (error) {
@@ -94,4 +99,3 @@ export const register = async (req: Request, res: Response): Promise<void> => {
     res.status(500).json({ error: 'Internal server error' });
   }
 };
-

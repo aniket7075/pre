@@ -7,6 +7,7 @@ import apiClient from '../api/client';
 import Animated, { FadeInDown, FadeInUp } from 'react-native-reanimated';
 import { useSelector } from 'react-redux';
 import { RootState } from '../store';
+import KidsBackground from '../components/KidsBackground';
 
 type Props = {
   navigation: NativeStackNavigationProp<any, any>;
@@ -61,6 +62,7 @@ const ChatListScreen: React.FC<Props> = ({ navigation }) => {
 
   return (
     <View className="flex-1 bg-slate-50" style={{ paddingTop: Math.max(insets.top, 10) }}>
+      <KidsBackground />
       
       {/* Premium Header */}
       <Animated.View entering={FadeInDown.duration(600)} className="px-6 py-4 flex-row justify-between items-center mb-2 z-10">

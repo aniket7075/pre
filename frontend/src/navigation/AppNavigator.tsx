@@ -40,6 +40,7 @@ import AssignFeeScreen from '../screens/AssignFeeScreen';
 import CreateHomeworkScreen from '../screens/CreateHomeworkScreen';
 import CreateNoticeScreen from '../screens/CreateNoticeScreen';
 import StudentProfileScreen from '../screens/StudentProfileScreen';
+import ParentProfileScreen from '../screens/ParentProfileScreen';
 
 const Stack = createNativeStackNavigator();
 const Tab = createBottomTabNavigator();
@@ -73,6 +74,7 @@ const TabNavigator = () => {
           else if (route.name === 'Notices') iconName = focused ? 'megaphone' : 'megaphone-outline';
           else if (route.name === 'Chats') iconName = focused ? 'chatbubbles' : 'chatbubbles-outline';
           else if (route.name === 'Leaves') iconName = focused ? 'document-text' : 'document-text-outline';
+          else if (route.name === 'Profile') iconName = focused ? 'person-circle' : 'person-circle-outline';
 
           return (
             <View style={{
@@ -90,8 +92,7 @@ const TabNavigator = () => {
         },
       })}
     >
-      <Tab.Screen 
-        name="Home" 
+      <Tab.Screen name="Home" 
         component={
           user?.role === 'super_admin' || user?.role === 'school_admin' 
             ? AdminDashboard 
@@ -103,6 +104,9 @@ const TabNavigator = () => {
       <Tab.Screen name="Notices" component={NoticeScreen} />
       <Tab.Screen name="Chats" component={ChatListScreen} />
       <Tab.Screen name="Leaves" component={LeaveScreen} />
+      {(user?.role === 'parent') && (
+        <Tab.Screen name="Profile" component={ParentProfileScreen} />
+      )}
     </Tab.Navigator>
   );
 };
@@ -134,10 +138,12 @@ const AppNavigator = () => {
             <Stack.Screen name="Fees" component={FeeScreen} />
             <Stack.Screen name="ChatRoom" component={ChatScreen} />
             <Stack.Screen name="Results" component={ResultScreen} />
+            <Stack.Screen name="Result" component={ResultScreen} />
             <Stack.Screen name="Progress" component={ProgressDashboard} />
             <Stack.Screen name="Staff" component={StaffScreen} />
             <Stack.Screen name="Students" component={StudentsScreen} />
             <Stack.Screen name="StudentProfile" component={StudentProfileScreen} />
+            <Stack.Screen name="ParentProfile" component={ParentProfileScreen} />
             <Stack.Screen name="AddParentStudent" component={AddParentStudentScreen} />
             <Stack.Screen name="Classes" component={ClassesScreen} />
             <Stack.Screen name="Notes" component={NotesScreen} />

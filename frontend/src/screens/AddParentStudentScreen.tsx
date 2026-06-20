@@ -1,11 +1,11 @@
 import React, { useState } from 'react';
-import { View, Text, TouchableOpacity, ScrollView, TextInput, KeyboardAvoidingView, Platform, Dimensions, Alert } from 'react-native';
+import { View, Text, TouchableOpacity, ScrollView, TextInput, KeyboardAvoidingView, Platform, Dimensions, Alert, Image } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import Icon from 'react-native-vector-icons/Ionicons';
 import apiClient from '../api/client';
-
-const { width } = Dimensions.get('window');
+import KidsBackground from '../components/KidsBackground';
+import DocumentPicker, { types } from 'react-native-document-picker';
 
 type Props = {
   navigation: NativeStackNavigationProp<any, any>;
@@ -17,11 +17,14 @@ const AddParentStudentScreen: React.FC<Props> = ({ navigation }) => {
   const [parentName, setParentName] = useState('');
   const [contactNumber, setContactNumber] = useState('');
   const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [alternativeMobile, setAlternativeMobile] = useState('');
+  const [address, setAddress] = useState('');
   const [loading, setLoading] = useState(false);
   
   // Dynamic state for multiple children
-  const [children, setChildren] = useState([
-    { id: 1, name: '', grade: '', age: '' }
+  const [children, setChildren] = useState<any[]>([
+    { id: 1, name: '', admissionNumber: '', grade: '', age: '', profileImage: null }
   ]);
 
   const addChild = () => {
@@ -29,15 +32,28 @@ const AddParentStudentScreen: React.FC<Props> = ({ navigation }) => {
       Alert.alert("Limit Reached", "You can add up to 3 children at once.");
       return;
     }
-    setChildren([...children, { id: Date.now(), name: '', grade: '', age: '' }]);
+    setChildren([...children, { id: Date.now(), name: '', admissionNumber: '', grade: '', age: '', profileImage: null }]);
   };
 
   const removeChild = (id: number) => {
     setChildren(children.filter(child => child.id !== id));
   };
 
-  const updateChild = (id: number, field: string, value: string) => {
+  const updateChild = (id: number, field: string, value: any) => {
     setChildren(children.map(child => child.id === id ? { ...child, [field]: value } : child));
+  };
+
+  const pickImage = async (id: number) => {
+    try {
+      const res = await DocumentPicker.pickSingle({
+        type: [types.images],
+      });
+      updateChild(id, 'profileImage', res);
+    } catch (err) {
+      if (!DocumentPicker.isCancel(err)) {
+        Alert.alert("Error", "Failed to pick image");
+      }
+    }
   };
 
   const handleSubmit = async () => {
@@ -48,14 +64,41 @@ const AddParentStudentScreen: React.FC<Props> = ({ navigation }) => {
     
     setLoading(true);
     try {
+      const processedChildren = await Promise.all(children.map(async (child) => {
+        let profileImageUrl = null;
+        if (child.profileImage) {
+          const formData = new FormData();
+          formData.append('profile_image', {
+            uri: child.profileImage.uri,
+            type: child.profileImage.type || 'image/jpeg',
+            name: child.profileImage.name || 'profile.jpg',
+          } as any);
+          
+          const uploadRes = await apiClient.post('/admin/upload', formData, {
+            headers: {
+              'Content-Type': 'multipart/form-data',
+            },
+          });
+          profileImageUrl = uploadRes.data.url;
+        }
+        
+        return {
+          ...child,
+          profileImageUrl
+        };
+      }));
+
       const response = await apiClient.post('/admin/add-family', {
         parentName,
         contactNumber,
+        alternativeMobile,
+        address,
         email,
-        children
+        password,
+        children: processedChildren
       });
       
-      Alert.alert("Success", "Parent & Student details saved successfully!");
+      Alert.alert("Success", "Family details saved successfully!");
       navigation.goBack();
     } catch (error: any) {
       console.error(error);
@@ -67,111 +110,163 @@ const AddParentStudentScreen: React.FC<Props> = ({ navigation }) => {
 
   return (
     <View className="flex-1 bg-white" style={{ paddingTop: Math.max(insets.top, 10) }}>
-      <KeyboardAvoidingView 
-        className="flex-1" 
-        behavior={Platform.OS === 'ios' ? 'padding' : undefined}
-      >
-        {/* Sleek Header */}
-        <View className="flex-row items-center px-6 py-4 mb-2">
-          <TouchableOpacity 
-            onPress={() => navigation.goBack()} 
-            className="bg-gray-50 p-3 rounded-full mr-4"
-          >
-            <Icon name="arrow-back" size={24} color="#0F172A" />
-          </TouchableOpacity>
-          <View>
-            <Text className="text-textSecondary text-xs font-semibold tracking-widest uppercase">New Admission</Text>
-            <Text className="text-textPrimary text-2xl font-black">Add Family</Text>
-          </View>
+      <KidsBackground />
+      {/* Header */}
+      <View className="px-6 py-4 flex-row items-center z-10 bg-white/80">
+        <TouchableOpacity 
+          onPress={() => navigation.goBack()} 
+          className="bg-white w-12 h-12 rounded-full items-center justify-center mr-4 shadow-sm"
+        >
+          <Icon name="arrow-back" size={24} color="#334155" />
+        </TouchableOpacity>
+        <View>
+          <Text className="text-slate-800 text-2xl font-black">Add Family</Text>
+          <Text className="text-slate-500 text-sm font-medium">Register Parent & Students</Text>
         </View>
-      
-        <ScrollView className="flex-1 px-5" showsVerticalScrollIndicator={false}>
+      </View>
+
+      <KeyboardAvoidingView 
+        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+        className="flex-1"
+      >
+        <ScrollView className="flex-1 px-6" showsVerticalScrollIndicator={false}>
           
-          {/* Parent Details Section */}
-          <View 
-            className="bg-white p-5 rounded-3xl mb-6 mt-2"
-            style={{ shadowColor: '#000', shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.05, shadowRadius: 10, elevation: 3, borderWidth: 1, borderColor: 'rgba(0,0,0,0.03)' }}
-          >
-            <View className="flex-row items-center mb-5">
-              <View className="bg-indigo-50 p-2 rounded-xl mr-3">
-                <Icon name="person" size={22} color="#6366F1" />
-              </View>
-              <Text className="text-lg font-bold text-textPrimary">Parent Details</Text>
+          {/* Parent Section */}
+          <View className="bg-white p-5 rounded-3xl shadow-sm mb-6 mt-4 border border-slate-100">
+            <View className="flex-row items-center mb-4">
+              <Icon name="people" size={24} color="#4F46E5" />
+              <Text className="text-lg font-bold text-slate-800 ml-2">Parent Details</Text>
             </View>
-            
-            <Text className="text-xs text-textSecondary mb-1.5 font-bold uppercase tracking-wider ml-1">Full Name *</Text>
-            <TextInput 
-              className="bg-gray-50 rounded-2xl p-4 mb-4 text-textPrimary font-medium border border-gray-100"
-              placeholder="e.g. Rahul Sharma"
-              value={parentName}
-              onChangeText={setParentName}
-              placeholderTextColor="#94A3B8"
-            />
 
-            <Text className="text-xs text-textSecondary mb-1.5 font-bold uppercase tracking-wider ml-1">Contact Number *</Text>
-            <TextInput 
-              className="bg-gray-50 rounded-2xl p-4 mb-4 text-textPrimary font-medium border border-gray-100"
-              placeholder="e.g. 9876543210"
-              keyboardType="phone-pad"
-              value={contactNumber}
-              onChangeText={setContactNumber}
-              placeholderTextColor="#94A3B8"
-            />
-            
-            <Text className="text-xs text-textSecondary mb-1.5 font-bold uppercase tracking-wider ml-1">Email Address</Text>
-            <TextInput 
-              className="bg-gray-50 rounded-2xl p-4 mb-2 text-textPrimary font-medium border border-gray-100"
-              placeholder="e.g. rahul@example.com"
-              keyboardType="email-address"
-              autoCapitalize="none"
-              value={email}
-              onChangeText={setEmail}
-              placeholderTextColor="#94A3B8"
-            />
-          </View>
-
-          {/* Children Details Section */}
-          <View className="flex-row items-center mb-4 mt-2 px-1">
-            <View className="bg-teal-50 p-2 rounded-xl mr-3">
-              <Icon name="people" size={22} color="#14B8A6" />
-            </View>
-            <Text className="text-lg font-bold text-textPrimary">Children Details</Text>
-          </View>
-
-          {children.map((child, index) => (
-            <View 
-              key={child.id} 
-              className="bg-white p-5 rounded-3xl mb-5"
-              style={{ shadowColor: '#000', shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.05, shadowRadius: 10, elevation: 3, borderWidth: 1, borderColor: 'rgba(0,0,0,0.03)' }}
-            >
-              <View className="flex-row justify-between items-center mb-5">
-                <View className="bg-teal-500 px-3 py-1 rounded-full">
-                  <Text className="text-xs font-bold text-white uppercase tracking-wider">Child {index + 1}</Text>
-                </View>
-                {children.length > 1 && (
-                  <TouchableOpacity 
-                    onPress={() => removeChild(child.id)}
-                    className="bg-red-50 p-2 rounded-full"
-                  >
-                    <Icon name="trash" size={18} color="#EF4444" />
-                  </TouchableOpacity>
-                )}
-              </View>
-              
-              <Text className="text-xs text-textSecondary mb-1.5 font-bold uppercase tracking-wider ml-1">Student Name *</Text>
+            <View className="mb-4">
+              <Text className="text-xs text-slate-500 mb-1 font-bold uppercase tracking-wider ml-1">Parent Name *</Text>
               <TextInput 
-                className="bg-gray-50 rounded-2xl p-4 mb-4 text-textPrimary font-medium border border-gray-100"
-                placeholder="e.g. Aarav Sharma"
-                value={child.name}
-                onChangeText={(val) => updateChild(child.id, 'name', val)}
+                className="bg-slate-50 border border-slate-100 rounded-2xl p-4 text-slate-800 font-medium"
+                placeholder="e.g. Rahul Sharma"
+                value={parentName}
+                onChangeText={setParentName}
                 placeholderTextColor="#94A3B8"
               />
+            </View>
 
-              <View className="flex-row justify-between">
+            <View className="mb-4">
+              <Text className="text-xs text-slate-500 mb-1 font-bold uppercase tracking-wider ml-1">Contact Number *</Text>
+              <TextInput 
+                className="bg-slate-50 border border-slate-100 rounded-2xl p-4 text-slate-800 font-medium"
+                placeholder="e.g. 9876543210"
+                value={contactNumber}
+                onChangeText={setContactNumber}
+                keyboardType="phone-pad"
+                placeholderTextColor="#94A3B8"
+              />
+            </View>
+
+            <View className="mb-4">
+              <Text className="text-xs text-slate-500 mb-1 font-bold uppercase tracking-wider ml-1">Alternative Contact</Text>
+              <TextInput 
+                className="bg-slate-50 border border-slate-100 rounded-2xl p-4 text-slate-800 font-medium"
+                placeholder="e.g. 9876543211"
+                value={alternativeMobile}
+                onChangeText={setAlternativeMobile}
+                keyboardType="phone-pad"
+                placeholderTextColor="#94A3B8"
+              />
+            </View>
+
+            <View className="mb-4">
+              <Text className="text-xs text-slate-500 mb-1 font-bold uppercase tracking-wider ml-1">Address</Text>
+              <TextInput 
+                className="bg-slate-50 border border-slate-100 rounded-2xl p-4 text-slate-800 font-medium"
+                placeholder="e.g. 123 Main St, City"
+                value={address}
+                onChangeText={setAddress}
+                placeholderTextColor="#94A3B8"
+              />
+            </View>
+
+            <View className="mb-4">
+              <Text className="text-xs text-slate-500 mb-1 font-bold uppercase tracking-wider ml-1">Email Address (For Login)</Text>
+              <TextInput 
+                className="bg-slate-50 border border-slate-100 rounded-2xl p-4 text-slate-800 font-medium"
+                placeholder="e.g. rahul@example.com"
+                value={email}
+                onChangeText={setEmail}
+                keyboardType="email-address"
+                autoCapitalize="none"
+                placeholderTextColor="#94A3B8"
+              />
+            </View>
+
+            <View className="mb-4">
+              <Text className="text-xs text-slate-500 mb-1 font-bold uppercase tracking-wider ml-1">Login Password *</Text>
+              <TextInput 
+                className="bg-slate-50 border border-slate-100 rounded-2xl p-4 text-slate-800 font-medium"
+                placeholder="Set a secure password"
+                value={password}
+                onChangeText={setPassword}
+                secureTextEntry
+                placeholderTextColor="#94A3B8"
+              />
+            </View>
+          </View>
+
+          {/* Children Section */}
+          <Text className="text-lg font-black text-slate-800 mb-4 ml-2">Students</Text>
+          
+          {children.map((child, index) => (
+            <View key={child.id} className="bg-white p-5 rounded-3xl shadow-sm mb-6 border border-slate-100 relative">
+              {index > 0 && (
+                <TouchableOpacity 
+                  onPress={() => removeChild(child.id)}
+                  className="absolute top-4 right-4 bg-red-50 p-2 rounded-full z-10"
+                >
+                  <Icon name="trash" size={20} color="#EF4444" />
+                </TouchableOpacity>
+              )}
+              
+              <View className="items-center mb-6 mt-2">
+                <TouchableOpacity onPress={() => pickImage(child.id)} className="relative">
+                  <View className="w-24 h-24 bg-teal-50 rounded-full items-center justify-center border-2 border-teal-100 overflow-hidden">
+                    {child.profileImage ? (
+                      <Image source={{ uri: child.profileImage.uri }} className="w-full h-full" />
+                    ) : (
+                      <Icon name="person" size={40} color="#0D9488" />
+                    )}
+                  </View>
+                  <View className="absolute bottom-0 right-0 bg-teal-600 w-8 h-8 rounded-full items-center justify-center border-2 border-white">
+                    <Icon name="camera" size={14} color="#fff" />
+                  </View>
+                </TouchableOpacity>
+                <Text className="text-xs text-slate-400 mt-2 font-bold">Upload Photo</Text>
+              </View>
+
+              <View className="mb-4">
+                <Text className="text-xs text-slate-500 mb-1 font-bold uppercase tracking-wider ml-1">Student Full Name *</Text>
+                <TextInput 
+                  className="bg-slate-50 border border-slate-100 rounded-2xl p-4 text-slate-800 font-medium"
+                  placeholder="e.g. Aryan Sharma"
+                  value={child.name}
+                  onChangeText={(val) => updateChild(child.id, 'name', val)}
+                  placeholderTextColor="#94A3B8"
+                />
+              </View>
+
+              <View className="mb-4">
+                <Text className="text-xs text-slate-500 mb-1 font-bold uppercase tracking-wider ml-1">Admission Number</Text>
+                <TextInput 
+                  className="bg-slate-50 border border-slate-100 rounded-2xl p-4 text-slate-800 font-medium"
+                  placeholder="e.g. ADM-1234"
+                  value={child.admissionNumber}
+                  onChangeText={(val) => updateChild(child.id, 'admissionNumber', val)}
+                  placeholderTextColor="#94A3B8"
+                />
+              </View>
+
+              <View className="flex-row justify-between mb-2">
                 <View className="flex-1 mr-2">
-                  <Text className="text-xs text-textSecondary mb-1.5 font-bold uppercase tracking-wider ml-1">Grade/Class *</Text>
+                  <Text className="text-xs text-slate-500 mb-1 font-bold uppercase tracking-wider ml-1">Grade/Class *</Text>
                   <TextInput 
-                    className="bg-gray-50 rounded-2xl p-4 mb-2 text-textPrimary font-medium border border-gray-100"
+                    className="bg-slate-50 border border-slate-100 rounded-2xl p-4 text-slate-800 font-medium"
                     placeholder="e.g. 1st Grade"
                     value={child.grade}
                     onChangeText={(val) => updateChild(child.id, 'grade', val)}
@@ -179,9 +274,9 @@ const AddParentStudentScreen: React.FC<Props> = ({ navigation }) => {
                   />
                 </View>
                 <View className="flex-1 ml-2">
-                  <Text className="text-xs text-textSecondary mb-1.5 font-bold uppercase tracking-wider ml-1">Age</Text>
+                  <Text className="text-xs text-slate-500 mb-1 font-bold uppercase tracking-wider ml-1">Age</Text>
                   <TextInput 
-                    className="bg-gray-50 rounded-2xl p-4 mb-2 text-textPrimary font-medium border border-gray-100"
+                    className="bg-slate-50 border border-slate-100 rounded-2xl p-4 text-slate-800 font-medium"
                     placeholder="e.g. 6"
                     keyboardType="numeric"
                     value={child.age}
@@ -195,23 +290,23 @@ const AddParentStudentScreen: React.FC<Props> = ({ navigation }) => {
 
           {children.length < 3 && (
             <TouchableOpacity 
-              className="flex-row items-center justify-center p-4 bg-gray-50 rounded-2xl mb-8 border border-dashed border-gray-300"
+              className="flex-row items-center justify-center p-4 bg-slate-50 rounded-2xl mb-8 border border-dashed border-slate-300"
               onPress={addChild}
             >
-              <Icon name="add-circle" size={24} color="#6366F1" className="mr-2" />
-              <Text className="font-bold text-primary ml-2 text-base">Add Another Child</Text>
+              <Icon name="add-circle" size={24} color="#0D9488" className="mr-2" />
+              <Text className="font-bold text-teal-700 ml-2 text-base">Add Another Child</Text>
             </TouchableOpacity>
           )}
 
           {/* Submit Button */}
           <TouchableOpacity 
-            className={`p-5 rounded-2xl items-center mb-10 ${loading ? 'bg-gray-400' : 'bg-primary'}`}
-            style={{ shadowColor: '#4F46E5', shadowOffset: { width: 0, height: 6 }, shadowOpacity: 0.3, shadowRadius: 8, elevation: 6 }}
+            className={`p-5 rounded-2xl items-center mb-10 ${loading ? 'bg-slate-400' : 'bg-teal-600'}`}
+            style={{ shadowColor: '#0D9488', shadowOffset: { width: 0, height: 6 }, shadowOpacity: 0.3, shadowRadius: 8, elevation: 6 }}
             onPress={handleSubmit}
             disabled={loading}
           >
-            <Text className="text-white font-bold text-lg">
-              {loading ? 'Saving...' : 'Save Record'}
+            <Text className="text-white font-black text-lg">
+              {loading ? 'Saving...' : 'Save Complete Record'}
             </Text>
           </TouchableOpacity>
           

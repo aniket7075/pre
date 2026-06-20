@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { View, Text, TextInput, TouchableOpacity, Alert, ScrollView } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import Icon from 'react-native-vector-icons/Ionicons';
@@ -7,6 +7,7 @@ import apiClient from '../api/client';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { useSelector } from 'react-redux';
 import { RootState } from '../store';
+import KidsBackground from '../components/KidsBackground';
 
 type Props = { navigation: NativeStackNavigationProp<any, any>; };
 
@@ -15,13 +16,28 @@ const CreateHomeworkScreen: React.FC<Props> = ({ navigation }) => {
   const { user } = useSelector((state: RootState) => state.auth);
   
   const [loading, setLoading] = useState(false);
-  const [grade, setGrade] = useState('1st Grade'); // Hardcoded for prototype
+  const [grade, setGrade] = useState('');
   const [subject, setSubject] = useState(user?.department || '');
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
   const [dueDate, setDueDate] = useState('Tomorrow');
   const [referenceLink, setReferenceLink] = useState('');
   const [files, setFiles] = useState<DocumentPickerResponse[]>([]);
+
+  useEffect(() => {
+    const fetchMyClass = async () => {
+      try {
+        const response = await apiClient.get('/classes');
+        const myClass = response.data.find((c: any) => c.class_teacher_id === user?.id);
+        if (myClass) {
+          setGrade(myClass.name);
+        }
+      } catch (error) {
+        console.error('Failed to fetch class', error);
+      }
+    };
+    fetchMyClass();
+  }, [user]);
 
   const pickFiles = async () => {
     try {
@@ -98,6 +114,7 @@ const CreateHomeworkScreen: React.FC<Props> = ({ navigation }) => {
 
   return (
     <View className="flex-1 bg-white" style={{ paddingTop: Math.max(insets.top, 10) }}>
+      <KidsBackground />
       <View className="flex-row items-center px-6 py-4 mb-2">
         <TouchableOpacity onPress={() => navigation.goBack()} className="bg-gray-50 p-3 rounded-full mr-4">
           <Icon name="arrow-back" size={24} color="#0F172A" />
@@ -120,7 +137,7 @@ const CreateHomeworkScreen: React.FC<Props> = ({ navigation }) => {
           <Icon name="school-outline" size={20} color="#64748B" className="mr-3" />
           <TextInput
             className="flex-1 text-base text-textPrimary font-semibold"
-            placeholder="1st Grade"
+            placeholder="e.g. 1st Grade"
             value={grade}
             onChangeText={setGrade}
           />

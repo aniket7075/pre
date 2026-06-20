@@ -4,6 +4,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import Icon from 'react-native-vector-icons/Ionicons';
 import apiClient from '../api/client';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
+import KidsBackground from '../components/KidsBackground';
 
 type Props = { navigation: NativeStackNavigationProp<any, any>; };
 
@@ -29,6 +30,7 @@ const GalleryScreen: React.FC<Props> = ({ navigation }) => {
 
   return (
     <View className="flex-1 bg-white" style={{ paddingTop: Math.max(insets.top, 10) }}>
+      <KidsBackground />
       <View className="flex-row items-center px-6 py-4 mb-2">
         <TouchableOpacity onPress={() => navigation.goBack()} className="bg-gray-50 p-3 rounded-full mr-4">
           <Icon name="arrow-back" size={24} color="#0F172A" />

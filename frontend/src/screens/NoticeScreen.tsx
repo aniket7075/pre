@@ -15,6 +15,7 @@ const NoticeScreen: React.FC<Props> = ({ navigation }) => {
   const insets = useSafeAreaInsets();
   const [loading, setLoading] = useState(true);
   const [notices, setNotices] = useState<any[]>([]);
+  const [category, setCategory] = useState<string>('all');
   const { user } = useSelector((state: RootState) => state.auth);
 
   useFocusEffect(
@@ -42,9 +43,13 @@ const NoticeScreen: React.FC<Props> = ({ navigation }) => {
     <Animated.View 
       entering={FadeInDown.delay(index * 100).duration(500)}
       layout={Layout.springify()}
-      className="bg-white p-5 rounded-3xl mb-4"
+      className="bg-white p-5 rounded-3xl mb-4 relative"
       style={{ shadowColor: '#F59E0B', shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.1, shadowRadius: 8, elevation: 3 }}
     >
+      {/* Unread badge */}
+      {!item.isRead && (
+        <View className="absolute top-2 right-2 w-3 h-3 bg-red-500 rounded-full" />
+      )}
       <View className="flex-row items-center mb-3">
         <View className="w-12 h-12 bg-amber-100 rounded-full items-center justify-center mr-3">
           <Icon name="megaphone" size={24} color="#D97706" />
@@ -90,16 +95,28 @@ const NoticeScreen: React.FC<Props> = ({ navigation }) => {
       </Animated.View>
       
       <View className="flex-1">
+        {/* Category Filter */}
+        <View className="flex-row justify-center my-4 space-x-2">
+          {['all', 'parents', 'teachers', 'students'].map((cat) => (
+            <TouchableOpacity
+              key={cat}
+              onPress={() => setCategory(cat)}
+              className={`px-4 py-2 rounded-full border ${category === cat ? 'bg-amber-500 border-amber-600' : 'bg-white'} `}
+            >
+              <Text className={`font-medium ${category === cat ? 'text-white' : 'text-amber-600'}`}>{cat.charAt(0).toUpperCase() + cat.slice(1)}</Text>
+            </TouchableOpacity>
+          ))}
+        </View>
         {loading ? (
           <View className="flex-1 items-center justify-center">
             <ActivityIndicator size="large" color="#D97706" />
           </View>
         ) : (
           <FlatList
-            data={notices}
+            data={notices.filter((n) => category === 'all' || n.audience === category)}
             keyExtractor={(item: any) => item.id.toString()}
             showsVerticalScrollIndicator={false}
-            contentContainerStyle={{ padding: 20, paddingBottom: 100 }}
+            contentContainerStyle={{ padding: 20, paddingBottom: 110 }}
             renderItem={renderNotice}
             ListEmptyComponent={
               <View className="items-center justify-center py-20 mt-10">
@@ -115,7 +132,7 @@ const NoticeScreen: React.FC<Props> = ({ navigation }) => {
 
       {/* Floating Add Button */}
       {canCreateNotice && (
-        <Animated.View entering={FadeInUp.delay(300).duration(500)} className="absolute bottom-6 right-6">
+        <Animated.View entering={FadeInUp.delay(300).duration(500)} className="absolute bottom-24 right-6">
           <TouchableOpacity 
             onPress={() => navigation.navigate('CreateNotice')}
             className="bg-amber-500 w-16 h-16 rounded-full items-center justify-center"

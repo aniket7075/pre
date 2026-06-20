@@ -8,6 +8,7 @@ export interface User {
   role: 'super_admin' | 'school_admin' | 'teacher' | 'parent';
   firstName: string;
   lastName: string;
+  phoneNumber?: string;
   profilePictureUrl?: string;
   department?: string;
 }
@@ -17,6 +18,7 @@ interface AuthState {
   token: string | null;
   isLoading: boolean;
   error: string | null;
+  activeChild: any | null;
 }
 
 const initialState: AuthState = {
@@ -24,6 +26,7 @@ const initialState: AuthState = {
   token: null,
   isLoading: true, // Initially true while we check for saved token
   error: null,
+  activeChild: null,
 };
 
 export const checkAuthStatus = createAsyncThunk('auth/checkStatus', async (_, { rejectWithValue }) => {
@@ -61,6 +64,9 @@ const authSlice = createSlice({
     clearError: (state) => {
       state.error = null;
     },
+    setActiveChild: (state, action: PayloadAction<any>) => {
+      state.activeChild = action.payload;
+    },
   },
   extraReducers: (builder) => {
     builder
@@ -97,9 +103,11 @@ const authSlice = createSlice({
       .addCase(logout.fulfilled, (state) => {
         state.user = null;
         state.token = null;
+        state.activeChild = null;
+        state.error = null;
       });
   },
 });
 
-export const { clearError } = authSlice.actions;
+export const { clearError, setActiveChild } = authSlice.actions;
 export default authSlice.reducer;

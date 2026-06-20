@@ -6,6 +6,9 @@ import Icon from 'react-native-vector-icons/Ionicons';
 import Animated, { FadeInDown, FadeInUp, Layout } from 'react-native-reanimated';
 import apiClient from '../api/client';
 import { useFocusEffect } from '@react-navigation/native';
+import KidsBackground from '../components/KidsBackground';
+import { useSelector } from 'react-redux';
+import { RootState } from '../store';
 
 type Props = {
   navigation: NativeStackNavigationProp<any, any>;
@@ -19,6 +22,8 @@ interface ClassData {
 
 const ClassesScreen: React.FC<Props> = ({ navigation }) => {
   const insets = useSafeAreaInsets();
+  const { user } = useSelector((state: RootState) => state.auth);
+  
   const [classes, setClasses] = useState<ClassData[]>([]);
   const [loading, setLoading] = useState(true);
   
@@ -44,7 +49,11 @@ const ClassesScreen: React.FC<Props> = ({ navigation }) => {
   const fetchClasses = async () => {
     try {
       const response = await apiClient.get('/classes');
-      setClasses(response.data);
+      if (user?.role === 'teacher') {
+        setClasses(response.data.filter((c: any) => c.class_teacher_id === user.id));
+      } else {
+        setClasses(response.data);
+      }
     } catch (error) {
       console.error(error);
       Alert.alert('Error', 'Failed to fetch classes');
@@ -152,19 +161,22 @@ const ClassesScreen: React.FC<Props> = ({ navigation }) => {
         </View>
       </View>
       
-      <View className="flex-row">
-        <TouchableOpacity onPress={() => openEditModal(item)} className="p-2 bg-slate-50 rounded-full mr-2">
-          <Icon name="pencil" size={20} color="#2563EB" />
-        </TouchableOpacity>
-        <TouchableOpacity onPress={() => handleDelete(item)} className="p-2 bg-slate-50 rounded-full">
-          <Icon name="trash" size={20} color="#EF4444" />
-        </TouchableOpacity>
-      </View>
+      {user?.role !== 'teacher' && (
+        <View className="flex-row">
+          <TouchableOpacity onPress={() => openEditModal(item)} className="p-2 bg-slate-50 rounded-full mr-2">
+            <Icon name="pencil" size={20} color="#2563EB" />
+          </TouchableOpacity>
+          <TouchableOpacity onPress={() => handleDelete(item)} className="p-2 bg-slate-50 rounded-full">
+            <Icon name="trash" size={20} color="#EF4444" />
+          </TouchableOpacity>
+        </View>
+      )}
     </Animated.View>
   );
 
   return (
     <View className="flex-1 bg-slate-50" style={{ paddingTop: Math.max(insets.top, 10) }}>
+      <KidsBackground />
       {/* Header */}
       <Animated.View entering={FadeInDown.duration(600)} className="px-6 py-4 flex-row justify-between items-center z-10">
         <View className="flex-row items-center">
@@ -175,7 +187,7 @@ const ClassesScreen: React.FC<Props> = ({ navigation }) => {
             <Icon name="arrow-back" size={24} color="#334155" />
           </TouchableOpacity>
           <View>
-            <Text className="text-slate-800 text-2xl font-black">Manage Classes</Text>
+            <Text className="text-slate-800 text-2xl font-black">{user?.role === 'teacher' ? 'My Classes' : 'Manage Classes'}</Text>
             <Text className="text-slate-500 text-sm font-medium">{classes.length} total classes</Text>
           </View>
         </View>
@@ -191,7 +203,7 @@ const ClassesScreen: React.FC<Props> = ({ navigation }) => {
           data={classes}
           keyExtractor={(item) => item.id.toString()}
           renderItem={renderClass}
-          contentContainerStyle={{ padding: 20, paddingBottom: 100 }}
+          contentContainerStyle={{ padding: 20, paddingBottom: 110 }}
           showsVerticalScrollIndicator={false}
           ListEmptyComponent={
             <View className="items-center mt-20">
@@ -203,15 +215,17 @@ const ClassesScreen: React.FC<Props> = ({ navigation }) => {
       )}
 
       {/* Floating Add Button */}
-      <Animated.View entering={FadeInUp.delay(300).duration(500)} className="absolute bottom-6 right-6">
-        <TouchableOpacity 
-          onPress={openAddModal}
-          className="bg-blue-600 w-16 h-16 rounded-full items-center justify-center"
-          style={{ shadowColor: '#2563EB', shadowOffset: { width: 0, height: 6 }, shadowOpacity: 0.4, shadowRadius: 8, elevation: 8 }}
-        >
-          <Icon name="add" size={32} color="#fff" />
-        </TouchableOpacity>
-      </Animated.View>
+      {user?.role !== 'teacher' && (
+        <Animated.View entering={FadeInUp.delay(300).duration(500)} className="absolute bottom-24 right-6">
+          <TouchableOpacity 
+            onPress={openAddModal}
+            className="bg-blue-600 w-16 h-16 rounded-full items-center justify-center"
+            style={{ shadowColor: '#2563EB', shadowOffset: { width: 0, height: 6 }, shadowOpacity: 0.4, shadowRadius: 8, elevation: 8 }}
+          >
+            <Icon name="add" size={32} color="#fff" />
+          </TouchableOpacity>
+        </Animated.View>
+      )}
 
       {/* Add/Edit Modal */}
       <Modal visible={modalVisible} animationType="slide" transparent={true}>

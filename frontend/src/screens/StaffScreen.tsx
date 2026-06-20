@@ -9,6 +9,7 @@ import apiClient from '../api/client';
 
 type Props = {
   navigation: NativeStackNavigationProp<any, any>;
+  route: any;
 };
 
 interface Staff {
@@ -23,7 +24,7 @@ interface Staff {
   phone_number?: string;
 }
 
-const StaffScreen: React.FC<Props> = ({ navigation }) => {
+const StaffScreen: React.FC<Props> = ({ navigation, route }) => {
   const insets = useSafeAreaInsets();
   const [staffList, setStaffList] = useState<Staff[]>([]);
   const [loading, setLoading] = useState(true);
@@ -49,6 +50,13 @@ const StaffScreen: React.FC<Props> = ({ navigation }) => {
       fetchStaff();
     }, [])
   );
+
+  useEffect(() => {
+    if (route.params?.openAddModal) {
+      openAddModal();
+      navigation.setParams({ openAddModal: undefined });
+    }
+  }, [route.params]);
 
   const fetchStaff = async () => {
     try {
@@ -210,7 +218,7 @@ const StaffScreen: React.FC<Props> = ({ navigation }) => {
           data={staffList}
           keyExtractor={(item) => item.id.toString()}
           renderItem={renderStaff}
-          contentContainerStyle={{ padding: 20, paddingBottom: 100 }}
+          contentContainerStyle={{ padding: 20, paddingBottom: 110 }}
           showsVerticalScrollIndicator={false}
           ListEmptyComponent={
             <View className="items-center mt-20">
@@ -222,7 +230,7 @@ const StaffScreen: React.FC<Props> = ({ navigation }) => {
       )}
 
       {/* Floating Add Button */}
-      <Animated.View entering={FadeInUp.delay(300).duration(500)} className="absolute bottom-6 right-6">
+      <Animated.View entering={FadeInUp.delay(300).duration(500)} className="absolute bottom-24 right-6">
         <TouchableOpacity 
           onPress={openAddModal}
           className="bg-indigo-600 w-16 h-16 rounded-full items-center justify-center"

@@ -6,6 +6,7 @@ import apiClient from '../api/client';
 import { useSelector } from 'react-redux';
 import { RootState } from '../store';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
+import KidsBackground from '../components/KidsBackground';
 
 type Props = { navigation: NativeStackNavigationProp<any, any>; };
 
@@ -68,6 +69,7 @@ const CertificateScreen: React.FC<Props> = ({ navigation }) => {
 
   return (
     <View className="flex-1 bg-white" style={{ paddingTop: Math.max(insets.top, 10) }}>
+      <KidsBackground />
       <View className="flex-row items-center justify-between px-6 py-4 mb-2">
         <View className="flex-row items-center">
           <TouchableOpacity onPress={() => navigation.goBack()} className="bg-gray-50 p-3 rounded-full mr-4">

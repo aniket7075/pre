@@ -54,7 +54,11 @@ const AlbumPhotosScreen: React.FC<Props> = ({ navigation, route }) => {
       cleanUrl.endsWith('.mkv') ||
       cleanUrl.endsWith('.quicktime') ||
       cleanUrl.endsWith('.3gp') ||
-      cleanUrl.endsWith('.avi')
+      cleanUrl.endsWith('.3gpp') ||
+      cleanUrl.endsWith('.avi') ||
+      cleanUrl.endsWith('.webm') ||
+      cleanUrl.endsWith('.mpeg') ||
+      cleanUrl.endsWith('.ogg')
     );
   };
 
@@ -107,6 +111,7 @@ const AlbumPhotosScreen: React.FC<Props> = ({ navigation, route }) => {
 
       await apiClient.post(`/gallery/${albumId}/photos`, formData, {
         headers: { 'Content-Type': 'multipart/form-data' },
+        timeout: 120000, // 2 minutes for larger video uploads
       });
 
       Alert.alert('Success', 'Media uploaded successfully');
@@ -138,7 +143,10 @@ const AlbumPhotosScreen: React.FC<Props> = ({ navigation, route }) => {
     }
   };
 
-  const isSelectedFileVideo = selectedFile && isVideoFile(selectedFile.name || '');
+  const isSelectedFileVideo = selectedFile && (
+    (selectedFile.type && selectedFile.type.startsWith('video/')) ||
+    isVideoFile(selectedFile.name || '')
+  );
 
   return (
     <View className="flex-1 bg-white" style={{ paddingTop: Math.max(insets.top, 10), paddingBottom: insets.bottom }}>

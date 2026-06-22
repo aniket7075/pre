@@ -263,7 +263,7 @@ const styles = StyleSheet.create({
   subText: {
     fontSize: 15,
     fontWeight: '600',
-    color: '#6366F1', // Playful blue/indigo matching splash screen
+    color: '#FF6B6B', // Playful light red matching splash screen
     marginTop: 4,
     textAlign: 'center',
   },

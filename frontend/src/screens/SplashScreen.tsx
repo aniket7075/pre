@@ -74,7 +74,6 @@ const SplashScreen: React.FC<Props> = ({ navigation }) => {
       </Animated.View>
 
       <Animated.View style={textStyle}>
-        <Text style={styles.title}>Qodo</Text>
         <Text style={styles.subtitle}>Learn, Play, Grow!</Text>
       </Animated.View>
     </View>
@@ -136,7 +135,7 @@ const styles = StyleSheet.create({
   subtitle: {
     fontSize: 18,
     fontWeight: '800',
-    color: '#6366F1', // Playful blue/indigo
+    color: '#FF6B6B', // Playful light red
     textAlign: 'center',
     marginTop: 8,
     letterSpacing: 0.5,

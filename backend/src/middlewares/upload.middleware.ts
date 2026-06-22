@@ -20,17 +20,28 @@ const storage = multer.diskStorage({
 });
 
 const fileFilter = (req: any, file: any, cb: any) => {
-  // Accept images, pdfs, and videos
-  const allowedMimeTypes = [
-    'image/jpeg', 'image/png', 'image/gif', 'image/webp',
-    'application/pdf',
-    'video/mp4', 'video/quicktime'
+  const ext = path.extname(file.originalname).toLowerCase();
+  
+  // Standard video, image, and document extensions
+  const allowedExtensions = [
+    '.jpg', '.jpeg', '.png', '.gif', '.webp', '.heic', '.heif',
+    '.pdf',
+    '.mp4', '.mov', '.mkv', '.3gp', '.3gpp', '.avi', '.webm', '.mpeg', '.ogg'
   ];
 
-  if (allowedMimeTypes.includes(file.mimetype)) {
+  const allowedMimeTypes = [
+    'image/jpeg', 'image/png', 'image/gif', 'image/webp', 'image/heic', 'image/heif',
+    'application/pdf',
+    'video/mp4', 'video/quicktime', 'video/3gpp', 'video/x-msvideo', 'video/x-matroska', 'video/webm', 'video/mpeg', 'video/ogg'
+  ];
+
+  const isAllowedMimeType = allowedMimeTypes.includes(file.mimetype) || file.mimetype.startsWith('image/') || file.mimetype.startsWith('video/');
+  const isAllowedExtension = allowedExtensions.includes(ext);
+
+  if (isAllowedMimeType || isAllowedExtension) {
     cb(null, true);
   } else {
-    cb(new Error('Invalid file type. Only JPG, PNG, PDF, and MP4 are allowed.'), false);
+    cb(new Error('Invalid file type. Only standard images, videos, and PDFs are allowed.'), false);
   }
 };
 
@@ -38,6 +49,6 @@ export const uploadMiddleware = multer({
   storage,
   fileFilter,
   limits: {
-    fileSize: 10 * 1024 * 1024 // 10MB limit
+    fileSize: 100 * 1024 * 1024 // 100MB limit
   }
 });

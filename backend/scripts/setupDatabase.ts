@@ -197,6 +197,7 @@ async function setupDatabase() {
         id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
         album_id UUID REFERENCES gallery_albums(id) ON DELETE CASCADE,
         image_url TEXT NOT NULL,
+        description TEXT,
         created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
       );
     `);

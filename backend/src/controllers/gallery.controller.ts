@@ -14,7 +14,7 @@ export const getAlbums = async (req: AuthRequest, res: Response): Promise<void> 
 
 export const createAlbum = async (req: AuthRequest, res: Response): Promise<void> => {
   try {
-    const { title, description, cover_image_url } = req.body;
+    const { title, description } = req.body;
     const role = req.user?.role;
     
     if (role === 'parent') {
@@ -22,10 +22,15 @@ export const createAlbum = async (req: AuthRequest, res: Response): Promise<void
       return;
     }
 
+    let cover_image_url = req.body.cover_image_url || '';
+    if (req.file) {
+      cover_image_url = `/uploads/${req.file.filename}`;
+    }
+
     const result = await pool.query(
       `INSERT INTO gallery_albums (title, description, cover_image_url) 
        VALUES ($1, $2, $3) RETURNING *`,
-      [title, description, cover_image_url]
+      [title, description || '', cover_image_url]
     );
 
     res.status(201).json({ message: 'Album created', data: result.rows[0] });
@@ -49,7 +54,7 @@ export const getPhotos = async (req: AuthRequest, res: Response): Promise<void> 
 export const addPhoto = async (req: AuthRequest, res: Response): Promise<void> => {
   try {
     const { album_id } = req.params;
-    const { image_url } = req.body;
+    const { description } = req.body;
     const role = req.user?.role;
     
     if (role === 'parent') {
@@ -57,9 +62,19 @@ export const addPhoto = async (req: AuthRequest, res: Response): Promise<void> =
       return;
     }
 
+    let image_url = req.body.image_url || '';
+    if (req.file) {
+      image_url = `/uploads/${req.file.filename}`;
+    }
+
+    if (!image_url) {
+      res.status(400).json({ error: 'Photo file or image URL is required' });
+      return;
+    }
+
     const result = await pool.query(
-      `INSERT INTO gallery_photos (album_id, image_url) VALUES ($1, $2) RETURNING *`,
-      [album_id, image_url]
+      `INSERT INTO gallery_photos (album_id, image_url, description) VALUES ($1, $2, $3) RETURNING *`,
+      [album_id, image_url, description || '']
     );
 
     res.status(201).json({ message: 'Photo added', data: result.rows[0] });

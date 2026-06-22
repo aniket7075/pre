@@ -15,7 +15,7 @@ type Props = {
 };
 
 const { width } = Dimensions.get('window');
-const logoImg = require('../../qidoo.png');
+const logoImg = require('../../qodo.png');
 
 const SplashScreen: React.FC<Props> = ({ navigation }) => {
   const logoScale = useSharedValue(0);
@@ -74,7 +74,7 @@ const SplashScreen: React.FC<Props> = ({ navigation }) => {
       </Animated.View>
 
       <Animated.View style={textStyle}>
-        <Text style={styles.title}>Qidoo</Text>
+        <Text style={styles.title}>Qodo</Text>
         <Text style={styles.subtitle}>Learn, Play, Grow!</Text>
       </Animated.View>
     </View>

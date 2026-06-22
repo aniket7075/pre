@@ -1,14 +1,15 @@
 import { Router } from 'express';
 import { getAlbums, createAlbum, getPhotos, addPhoto } from '../controllers/gallery.controller';
 import { authenticate } from '../middlewares/auth.middleware';
+import { uploadMiddleware } from '../middlewares/upload.middleware';
 
 const router = Router();
 
 router.use(authenticate);
 
 router.get('/', getAlbums);
-router.post('/', createAlbum);
+router.post('/', uploadMiddleware.single('cover_image'), createAlbum);
 router.get('/:album_id/photos', getPhotos);
-router.post('/:album_id/photos', addPhoto);
+router.post('/:album_id/photos', uploadMiddleware.single('photo'), addPhoto);
 
 export default router;

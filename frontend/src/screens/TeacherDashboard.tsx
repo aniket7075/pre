@@ -61,7 +61,7 @@ const TeacherDashboard: React.FC<Props> = ({ navigation }) => {
       <KidsBackground />
       
       {/* Decorative Background Blob */}
-      <View className="absolute w-[450px] h-[450px] bg-amber-100 rounded-full opacity-60 -top-24 -right-10" />
+      <View pointerEvents="none" className="absolute w-[450px] h-[450px] bg-amber-100 rounded-full opacity-60 -top-24 -right-10" />
 
       {/* Modern Profile Header */}
       <Animated.View entering={FadeInDown.duration(800)} className="px-6 py-4 flex-row justify-between items-center mb-4 z-10">
@@ -85,7 +85,7 @@ const TeacherDashboard: React.FC<Props> = ({ navigation }) => {
         </TouchableOpacity>
       </Animated.View>
 
-      <ScrollView className="flex-1 px-6 z-10" showsVerticalScrollIndicator={false} contentContainerStyle={{ paddingBottom: 40 }}>
+      <ScrollView className="flex-1 px-6 z-10" showsVerticalScrollIndicator={false} contentContainerStyle={{ paddingBottom: 120 }}>
         
         {/* Primary Class Card */}
         <Animated.View entering={FadeInUp.delay(200).duration(800)}>

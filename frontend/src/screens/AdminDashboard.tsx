@@ -136,7 +136,7 @@ const AdminDashboard: React.FC<Props> = ({ navigation }) => {
       <KidsBackground />
 
       {/* Decorative Background Blob */}
-      <View className="absolute w-[500px] h-[500px] bg-amber-100 rounded-full opacity-50 -top-20 -right-20" />
+      <View pointerEvents="none" className="absolute w-[500px] h-[500px] bg-amber-100 rounded-full opacity-50 -top-20 -right-20" />
 
       {/* Header */}
       <Animated.View entering={FadeInDown.duration(800)} className="px-6 py-4 flex-row justify-between items-center mb-2 z-10">
@@ -156,7 +156,7 @@ const AdminDashboard: React.FC<Props> = ({ navigation }) => {
 
       </Animated.View>
 
-      <ScrollView className="flex-1 px-6 z-10" showsVerticalScrollIndicator={false} contentContainerStyle={{ paddingBottom: 110 }}>
+      <ScrollView className="flex-1 px-6 z-10" showsVerticalScrollIndicator={false} contentContainerStyle={{ paddingBottom: 130 }}>
         {/* Statistics Cards Grid */}
         <Animated.View entering={FadeInUp.delay(100).duration(800)} className="mb-6">
           <Text className="text-slate-800 text-lg font-black mb-3 ml-2 tracking-wide">School Overview</Text>

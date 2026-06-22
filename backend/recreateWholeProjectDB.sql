@@ -495,7 +495,7 @@ CREATE INDEX IF NOT EXISTS idx_chat_messages_room ON chat_messages(room_id);
 INSERT INTO users (email, password_hash, role, first_name, last_name, is_active)
 VALUES (
   'admin@prescole.com', 
-  '$2b$10$Wq46iXn18f7p9n7Bf1h7iuzD/2X8sB.j9Xp3K2871sNn2c1n3n3n.', -- Hashed version of 'Admin@123'
+  '$2b$10$mxegjKs2hbiODsR4oCFTCej.TtxOH3YGFzPr7RngGvb.NHN0ed9ba', -- Hashed version of 'Admin@123'
   'super_admin', 
   'Super', 
   'Admin', 

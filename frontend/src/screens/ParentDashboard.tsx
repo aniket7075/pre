@@ -69,7 +69,7 @@ const ParentDashboard: React.FC<Props> = ({ navigation }) => {
       <KidsBackground />
       
       {/* Decorative Background Blob */}
-      <View className="absolute w-[400px] h-[400px] bg-pink-100 rounded-full opacity-60 -top-20 -left-20" />
+      <View pointerEvents="none" className="absolute w-[400px] h-[400px] bg-pink-100 rounded-full opacity-60 -top-20 -left-20" />
 
       {/* Modern Profile Header */}
       <Animated.View entering={FadeInDown.duration(800)} className="px-6 py-4 flex-row justify-between items-center mb-2 z-10">
@@ -95,7 +95,7 @@ const ParentDashboard: React.FC<Props> = ({ navigation }) => {
         </TouchableOpacity>
       </Animated.View>
 
-      <ScrollView className="flex-1 z-10" showsVerticalScrollIndicator={false} contentContainerStyle={{ paddingBottom: 40 }}>
+      <ScrollView className="flex-1 z-10" showsVerticalScrollIndicator={false} contentContainerStyle={{ paddingBottom: 120 }}>
         
         {/* Child Switcher Section */}
         <Animated.View entering={FadeInDown.delay(100).duration(800)} className="mb-6 mt-2">

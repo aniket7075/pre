@@ -15,6 +15,7 @@ async function run() {
     console.log('🔧 Adding missing columns to students and fee_structures tables...');
     await pool.query(`ALTER TABLE students ADD COLUMN IF NOT EXISTS grade VARCHAR(50);`);
     await pool.query(`ALTER TABLE fee_structures ADD COLUMN IF NOT EXISTS grade VARCHAR(100);`);
+    await pool.query(`ALTER TABLE gallery_photos ADD COLUMN IF NOT EXISTS description TEXT;`);
     console.log('✅ Columns added (or already existed).');
   } catch (err) {
     console.error('❌ Error adding missing columns:', err);

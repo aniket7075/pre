@@ -7,6 +7,8 @@ import { AppDispatch, RootState } from '../store';
 import { checkAuthStatus } from '../store/slices/authSlice';
 import Icon from 'react-native-vector-icons/Ionicons';
 import { View, Platform } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import AlbumPhotosScreen from '../screens/AlbumPhotosScreen'; // Trigger IDE cache reload
 
 // Screens
 import SplashScreen from '../screens/SplashScreen';
@@ -47,6 +49,7 @@ const Tab = createBottomTabNavigator();
 
 const TabNavigator = () => {
   const { user } = useSelector((state: RootState) => state.auth);
+  const insets = useSafeAreaInsets();
 
   return (
     <Tab.Navigator
@@ -61,8 +64,8 @@ const TabNavigator = () => {
           shadowOffset: { width: 0, height: -8 },
           shadowOpacity: 0.12,
           shadowRadius: 15,
-          height: Platform.OS === 'ios' ? 90 : 75,
-          paddingBottom: Platform.OS === 'ios' ? 24 : 12,
+          height: Platform.OS === 'ios' ? (insets.bottom > 0 ? 66 + insets.bottom : 80) : (65 + insets.bottom),
+          paddingBottom: insets.bottom > 0 ? insets.bottom : (Platform.OS === 'ios' ? 15 : 10),
           paddingTop: 10,
           position: 'absolute',
           borderTopLeftRadius: 30,
@@ -130,14 +133,14 @@ const TabNavigator = () => {
         },
       })}
     >
-      <Tab.Screen name="Home" 
+      <Tab.Screen name="Home"
         component={
-          user?.role === 'super_admin' || user?.role === 'school_admin' 
-            ? AdminDashboard 
-            : user?.role === 'teacher' 
-            ? TeacherDashboard 
-            : ParentDashboard
-        } 
+          user?.role === 'super_admin' || user?.role === 'school_admin'
+            ? AdminDashboard
+            : user?.role === 'teacher'
+              ? TeacherDashboard
+              : ParentDashboard
+        }
       />
       <Tab.Screen name="Notices" component={NoticeScreen} />
       <Tab.Screen name="Chats" component={ChatListScreen} />
@@ -168,7 +171,7 @@ const AppNavigator = () => {
           // Authenticated Stack
           <>
             <Stack.Screen name="MainTabs" component={TabNavigator} />
-            
+
             {/* Inner Screens that don't need Bottom Tabs */}
             <Stack.Screen name="Attendance" component={AttendanceScreen} />
             <Stack.Screen name="Homework" component={HomeworkScreen} />
@@ -191,6 +194,7 @@ const AppNavigator = () => {
             <Stack.Screen name="CreateNotice" component={CreateNoticeScreen} />
             <Stack.Screen name="Timetable" component={TimetableScreen} />
             <Stack.Screen name="Gallery" component={GalleryScreen} />
+            <Stack.Screen name="AlbumPhotos" component={AlbumPhotosScreen} />
             <Stack.Screen name="LessonPlan" component={LessonPlanScreen} />
             <Stack.Screen name="EnterMarks" component={MarkEntryScreen} />
             <Stack.Screen name="Library" component={LibraryScreen} />
